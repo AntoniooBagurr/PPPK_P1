@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "0XXi9MiNYHOByrjnTTf4hgSeut8RyJ9/5wYWTgO8Rbk=",
+  "Source": "MedSys.Api",
+  "BasePath": "_content/MedSys.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
