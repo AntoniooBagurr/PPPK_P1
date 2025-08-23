@@ -14,6 +14,7 @@ public class AppDb : DbContext
     public DbSet<Prescription> Prescriptions => Set<Prescription>();
     public DbSet<Medication> Medications => Set<Medication>();
     public DbSet<PrescriptionItem> PrescriptionItems => Set<PrescriptionItem>();
+    public DbSet<VisitType> VisitTypes => Set<VisitType>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -25,5 +26,19 @@ public class AppDb : DbContext
         });
 
         base.OnModelCreating(b);
+        // visit types
+
+        b.Entity<VisitType>(e =>
+        {
+            e.HasKey(vt => vt.Code);
+            e.Property(vt => vt.Code).HasMaxLength(10);
+        });
+
+        b.Entity<Visit>()
+         .HasOne<VisitType>()
+         .WithMany()
+         .HasForeignKey(v => v.VisitType)
+         .HasPrincipalKey(vt => vt.Code);
+
     }
 }
