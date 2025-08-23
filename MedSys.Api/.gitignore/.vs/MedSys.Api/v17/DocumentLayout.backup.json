@@ -1,0 +1,168 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\models\\prescription.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\models\\prescription.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\models\\prescriptionitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\models\\prescriptionitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\models\\medication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\models\\medication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\models\\document.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\models\\document.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\models\\visit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\models\\visit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\models\\medicalhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\models\\medicalhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\models\\patient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\models\\patient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PrescriptionItem.cs",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\PrescriptionItem.cs",
+              "RelativeDocumentMoniker": "MedSys.Api\\Models\\PrescriptionItem.cs",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\PrescriptionItem.cs",
+              "RelativeToolTip": "MedSys.Api\\Models\\PrescriptionItem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T10:41:03.62Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Prescription.cs",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\Prescription.cs",
+              "RelativeDocumentMoniker": "MedSys.Api\\Models\\Prescription.cs",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\Prescription.cs",
+              "RelativeToolTip": "MedSys.Api\\Models\\Prescription.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T10:40:44.8Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Medication.cs",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\Medication.cs",
+              "RelativeDocumentMoniker": "MedSys.Api\\Models\\Medication.cs",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\Medication.cs",
+              "RelativeToolTip": "MedSys.Api\\Models\\Medication.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T10:40:19.223Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Document.cs",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\Document.cs",
+              "RelativeDocumentMoniker": "MedSys.Api\\Models\\Document.cs",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\Document.cs",
+              "RelativeToolTip": "MedSys.Api\\Models\\Document.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T10:27:14.831Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Visit.cs",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\Visit.cs",
+              "RelativeDocumentMoniker": "MedSys.Api\\Models\\Visit.cs",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\Visit.cs",
+              "RelativeToolTip": "MedSys.Api\\Models\\Visit.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T10:26:50.806Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "MedicalHistory.cs",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\MedicalHistory.cs",
+              "RelativeDocumentMoniker": "MedSys.Api\\Models\\MedicalHistory.cs",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\MedicalHistory.cs",
+              "RelativeToolTip": "MedSys.Api\\Models\\MedicalHistory.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T10:26:30.443Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Patient.cs",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\Patient.cs",
+              "RelativeDocumentMoniker": "MedSys.Api\\Models\\Patient.cs",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Models\\Patient.cs",
+              "RelativeToolTip": "MedSys.Api\\Models\\Patient.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T10:26:08.802Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Program.cs",
+              "RelativeDocumentMoniker": "MedSys.Api\\Program.cs",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Program.cs",
+              "RelativeToolTip": "MedSys.Api\\Program.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAACgAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T10:23:10.602Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "MedSys.Api\\appsettings.Development.json",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\appsettings.Development.json",
+              "RelativeToolTip": "MedSys.Api\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-08-23T10:20:13.464Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
