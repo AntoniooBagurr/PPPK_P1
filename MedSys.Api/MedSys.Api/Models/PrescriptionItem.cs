@@ -1,4 +1,6 @@
-﻿namespace MedSys.Api.Models
+﻿using System.Text.Json.Serialization;
+
+namespace MedSys.Api.Models
 {
     public class PrescriptionItem
     {
@@ -9,7 +11,7 @@
         public string Frequency { get; set; } = default!;  
         public int? DurationDays { get; set; }
 
-        public virtual Prescription Prescription { get; set; } = default!;
-        public virtual Medication Medication { get; set; } = default!;
+        [JsonIgnore] public virtual Prescription Prescription { get; set; } = default!;
+        [JsonIgnore] public virtual Medication Medication { get; set; } = default!;
     }
 }

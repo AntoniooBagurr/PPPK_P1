@@ -1,4 +1,5 @@
 ﻿using System.Reflection.Metadata;
+using System.Text.Json.Serialization;
 
 namespace MedSys.Api.Models
 {
@@ -10,8 +11,8 @@ namespace MedSys.Api.Models
         public string VisitType { get; set; } = default!; // GP, KRV, ...
         public string? Notes { get; set; }
 
-        public virtual Patient Patient { get; set; } = default!;
-        public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
-        public virtual ICollection<Prescription> Prescriptions { get; set; } = new List<Prescription>();
+        [JsonIgnore] public virtual Patient Patient { get; set; } = default!;
+        [JsonIgnore] public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
+        [JsonIgnore] public virtual ICollection<Prescription> Prescriptions { get; set; } = new List<Prescription>();
     }
 }

@@ -1,30 +1,54 @@
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 using MedSys.Api.Data;
 using MedSys.Api.Repositories;
-
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
-
+// EF Core + Npgsql + Lazy
 builder.Services.AddDbContext<AppDb>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
        .UseLazyLoadingProxies());
 
-builder.Services.AddCors(opt =>
+// Repository factory
+builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
+
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        o.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
+
+builder.Services.AddSwaggerGen(c =>
 {
-    opt.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+    c.SwaggerDoc("v1", new() { Title = "MedSys.Api", Version = "v1" });
+
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+
+    c.CustomSchemaIds(t => t.FullName!.Replace('+', '_'));
+
+    c.MapType<DateTimeOffset>(() => new OpenApiSchema { Type = "string", Format = "date-time" });
+
+    c.SupportNonNullableReferenceTypes();
 });
+builder.Services.AddCors(p => p.AddDefaultPolicy(pb => pb.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
+
+app.Use(async (ctx, next) =>
+{
+    try { await next(); }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "UNHANDLED for {Path}", ctx.Request.Path);
+        throw; 
+    }
+});
 
 using (var scope = app.Services.CreateScope())
 {
@@ -35,13 +59,10 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MedSys.Api v1"));
 }
 
 app.UseCors();
-
 app.UseHttpsRedirection();
-
 app.MapControllers();
-
 app.Run();

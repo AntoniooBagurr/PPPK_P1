@@ -1,0 +1,54 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\controllers\\documentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\controllers\\documentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|c:\\users\\antonio\\desktop\\projecttask\\pppk_p1\\medsys.api\\medsys.api\\controllers\\patientscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7759B34F-D108-4F92-84D4-6045D034B3D8}|MedSys.Api\\MedSys.Api.csproj|solutionrelative:medsys.api\\controllers\\patientscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DocumentsController.cs",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Controllers\\DocumentsController.cs",
+              "RelativeDocumentMoniker": "MedSys.Api\\Controllers\\DocumentsController.cs",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Controllers\\DocumentsController.cs",
+              "RelativeToolTip": "MedSys.Api\\Controllers\\DocumentsController.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAAgwD4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T15:03:44.657Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PatientsController.cs",
+              "DocumentMoniker": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Controllers\\PatientsController.cs",
+              "RelativeDocumentMoniker": "MedSys.Api\\Controllers\\PatientsController.cs",
+              "ToolTip": "C:\\Users\\Antonio\\Desktop\\ProjectTask\\PPPK_P1\\MedSys.Api\\MedSys.Api\\Controllers\\PatientsController.cs",
+              "RelativeToolTip": "MedSys.Api\\Controllers\\PatientsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-23T15:02:45.342Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,6 @@
-﻿namespace MedSys.Api.Models
+﻿using System.Text.Json.Serialization;
+
+namespace MedSys.Api.Models
 {
     public class Patient
     {
@@ -10,7 +12,7 @@
         public string Sex { get; set; } = default!; // 'M' ili 'F'
         public string? PatientNumber { get; set; }   // dodati migracijom kasnije (Ishod 5)
 
-        public virtual ICollection<MedicalHistory> MedicalHistory { get; set; } = new List<MedicalHistory>();
-        public virtual ICollection<Visit> Visits { get; set; } = new List<Visit>();
+        [JsonIgnore] public virtual ICollection<MedicalHistory> MedicalHistory { get; set; } = new List<MedicalHistory>();
+        [JsonIgnore] public virtual ICollection<Visit> Visits { get; set; } = new List<Visit>();
     }
 }

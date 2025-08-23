@@ -1,7 +1,7 @@
 ﻿using MedSys.Api.Data;
+using MedSys.Api.Dtos;
 using MedSys.Api.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace MedSys.Api.Controllers;
 
@@ -9,27 +9,32 @@ namespace MedSys.Api.Controllers;
 [Route("api/[controller]")]
 public class VisitsController : ControllerBase
 {
-    private static readonly HashSet<string> AllowedTypes = new(StringComparer.OrdinalIgnoreCase)
-    { "GP","KRV","X-RAY","CT","MR","ULTRA","EKG","ECHO","EYE","DERM","DENTA","MAMMO","NEURO" };
-
     private readonly AppDb _db;
     public VisitsController(AppDb db) => _db = db;
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] Visit v)
+    public async Task<IActionResult> Create([FromBody] VisitCreateDto dto)
     {
-        if (!AllowedTypes.Contains(v.VisitType)) return BadRequest("Neispravan visit_type.");
-        if (await _db.Patients.FindAsync(v.PatientId) is null) return BadRequest("Pacijent ne postoji.");
+        if (await _db.Patients.FindAsync(dto.PatientId) is null)
+            return BadRequest("Pacijent ne postoji.");
+
+        var v = new Visit
+        {
+            PatientId = dto.PatientId,
+            VisitDateTime = dto.VisitDateTime,
+            VisitType = dto.VisitType,
+            Notes = dto.Notes
+        };
 
         await _db.Visits.AddAsync(v);
         await _db.SaveChangesAsync();
-        return Ok(v);
+        return Ok(new { v.Id, v.PatientId, v.VisitDateTime, v.VisitType, v.Notes });
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Get(Guid id)
     {
         var v = await _db.Visits.FindAsync(id);
-        return v is null ? NotFound() : Ok(v);
+        return v is null ? NotFound() : Ok(new { v.Id, v.PatientId, v.VisitDateTime, v.VisitType, v.Notes });
     }
 }

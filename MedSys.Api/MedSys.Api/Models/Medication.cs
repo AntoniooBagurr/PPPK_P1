@@ -1,4 +1,6 @@
-﻿namespace MedSys.Api.Models
+﻿using System.Text.Json.Serialization;
+
+namespace MedSys.Api.Models
 {
     public class Medication
     {
@@ -6,6 +8,6 @@
         public string Name { get; set; } = default!;
         public string? AtcCode { get; set; }
 
-        public virtual ICollection<PrescriptionItem> Items { get; set; } = new List<PrescriptionItem>();
+        [JsonIgnore] public virtual ICollection<PrescriptionItem> Items { get; set; } = new List<PrescriptionItem>();
     }
 }

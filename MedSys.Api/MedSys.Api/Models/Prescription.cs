@@ -1,4 +1,6 @@
-﻿namespace MedSys.Api.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace MedSys.Api.Models;
 
 public class Prescription
 {
@@ -7,6 +9,6 @@ public class Prescription
     public DateTimeOffset IssuedAt { get; set; } = DateTimeOffset.UtcNow;
     public string? Notes { get; set; }
 
-    public virtual Visit Visit { get; set; } = default!;
-    public virtual ICollection<PrescriptionItem> Items { get; set; } = new List<PrescriptionItem>();
+    [JsonIgnore] public virtual Visit Visit { get; set; } = default!;
+    [JsonIgnore] public virtual ICollection<PrescriptionItem> Items { get; set; } = new List<PrescriptionItem>();
 }

@@ -1,4 +1,6 @@
-﻿namespace MedSys.Api.Models
+﻿using System.Text.Json.Serialization;
+
+namespace MedSys.Api.Models
 {
     public class Document
     {
@@ -10,6 +12,6 @@
         public string StorageUrl { get; set; } = default!;
         public DateTimeOffset UploadedAt { get; set; } = DateTimeOffset.UtcNow;
 
-        public virtual Visit Visit { get; set; } = default!;
+        [JsonIgnore] public virtual Visit Visit { get; set; } = default!;
     }
 }

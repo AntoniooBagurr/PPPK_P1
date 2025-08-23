@@ -1,4 +1,6 @@
-﻿namespace MedSys.Api.Models
+﻿using System.Text.Json.Serialization;
+
+namespace MedSys.Api.Models
 {
     public class MedicalHistory
     {
@@ -8,6 +10,6 @@
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 
-        public virtual Patient Patient { get; set; } = default!;
+        [JsonIgnore] public virtual Patient Patient { get; set; } = default!;
     }
 }
