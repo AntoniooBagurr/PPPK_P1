@@ -15,6 +15,7 @@ public class AppDb : DbContext
     public DbSet<Medication> Medications => Set<Medication>();
     public DbSet<PrescriptionItem> PrescriptionItems => Set<PrescriptionItem>();
     public DbSet<VisitType> VisitTypes => Set<VisitType>();
+    public DbSet<Doctor> Doctors => Set<Doctor>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -39,6 +40,21 @@ public class AppDb : DbContext
          .WithMany()
          .HasForeignKey(v => v.VisitType)
          .HasPrincipalKey(vt => vt.Code);
+
+        // Doctor
+        b.Entity<Doctor>(e =>
+        {
+            e.Property(d => d.FullName).IsRequired().HasMaxLength(150);
+            e.HasIndex(d => d.LicenseNo).IsUnique().HasFilter("\"LicenseNo\" IS NOT NULL");
+        });
+
+        // Visit → Doctor (FK)
+        b.Entity<Visit>()
+            .HasOne(v => v.Doctor)
+            .WithMany(d => d.Visits)
+            .HasForeignKey(v => v.DoctorId)
+            .OnDelete(DeleteBehavior.SetNull);
+
 
     }
 }

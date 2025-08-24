@@ -16,4 +16,5 @@ public class VisitCreateDto
 
     [MaxLength(2000)]
     public string? Notes { get; set; }
+    public Guid? DoctorId { get; set; }
 }

@@ -6,5 +6,7 @@ public record VisitReadDto(
     string VisitType,
     string? Notes,
     List<DocumentDto> Documents,
-    List<PrescriptionReadDto> Prescriptions
+    List<PrescriptionReadDto> Prescriptions,
+     Guid? DoctorId,          
+    string? DoctorName
 );

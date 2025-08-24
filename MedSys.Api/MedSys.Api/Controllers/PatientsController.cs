@@ -73,7 +73,9 @@ public class PatientsController : ControllerBase
                           .Select(i => new PrescriptionItemReadDto(i.Dosage, i.Frequency, i.DurationDays, i.Medication.Name))
                           .ToList()
                     ))
-                    .ToList()
+                    .ToList(),
+                     v.DoctorId,                   
+        v.Doctor != null ? v.Doctor.FullName : null 
             ))
             .ToList();
 

@@ -25,6 +25,35 @@ namespace MedSys.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("MedSys.Api.Models.Doctor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("LicenseNo")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LicenseNo")
+                        .IsUnique()
+                        .HasFilter("\"LicenseNo\" IS NOT NULL");
+
+                    b.ToTable("Doctors");
+                });
+
             modelBuilder.Entity("MedSys.Api.Models.Document", b =>
                 {
                     b.Property<Guid>("Id")
@@ -199,6 +228,9 @@ namespace MedSys.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("DoctorId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Notes")
                         .HasColumnType("text");
 
@@ -213,6 +245,8 @@ namespace MedSys.Api.Migrations
                         .HasColumnType("character varying(10)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DoctorId");
 
                     b.HasIndex("PatientId");
 
@@ -290,6 +324,11 @@ namespace MedSys.Api.Migrations
 
             modelBuilder.Entity("MedSys.Api.Models.Visit", b =>
                 {
+                    b.HasOne("MedSys.Api.Models.Doctor", "Doctor")
+                        .WithMany("Visits")
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("MedSys.Api.Models.Patient", "Patient")
                         .WithMany("Visits")
                         .HasForeignKey("PatientId")
@@ -302,7 +341,14 @@ namespace MedSys.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Doctor");
+
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MedSys.Api.Models.Doctor", b =>
+                {
+                    b.Navigation("Visits");
                 });
 
             modelBuilder.Entity("MedSys.Api.Models.Medication", b =>

@@ -18,23 +18,29 @@ public class VisitsController : ControllerBase
         if (await _db.Patients.FindAsync(dto.PatientId) is null)
             return BadRequest("Pacijent ne postoji.");
 
+        if (dto.DoctorId.HasValue && await _db.Doctors.FindAsync(dto.DoctorId.Value) is null)
+            return BadRequest("Liječnik ne postoji.");
+
         var v = new Visit
         {
             PatientId = dto.PatientId,
             VisitDateTime = dto.VisitDateTime,
             VisitType = dto.VisitType,
-            Notes = dto.Notes
+            Notes = dto.Notes,
+            DoctorId = dto.DoctorId
         };
 
         await _db.Visits.AddAsync(v);
         await _db.SaveChangesAsync();
-        return Ok(new { v.Id, v.PatientId, v.VisitDateTime, v.VisitType, v.Notes });
+        return Ok(new { v.Id, v.PatientId, v.VisitDateTime, v.VisitType, v.Notes, v.DoctorId });
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> Get(Guid id)
+    public async Task<IActionResult> GetById(Guid id)
     {
         var v = await _db.Visits.FindAsync(id);
-        return v is null ? NotFound() : Ok(new { v.Id, v.PatientId, v.VisitDateTime, v.VisitType, v.Notes });
+        return v is null
+            ? NotFound()
+            : Ok(new { v.Id, v.PatientId, v.VisitDateTime, v.VisitType, v.Notes, v.DoctorId });
     }
 }
