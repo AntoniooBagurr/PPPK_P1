@@ -3,6 +3,7 @@ using MedSys.Api.Data;
 using MedSys.Api.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using MedSys.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,8 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
 
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSingleton<IStorageService, SupabaseStorageService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(o =>
@@ -61,7 +64,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MedSys.Api v1"));
 }
-
+app.UseDefaultFiles();  
+app.UseStaticFiles();
 app.UseCors();
 app.UseHttpsRedirection();
 app.MapControllers();

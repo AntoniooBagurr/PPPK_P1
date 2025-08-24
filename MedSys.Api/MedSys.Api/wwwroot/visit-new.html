@@ -1,0 +1,58 @@
+﻿<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8" />
+    <title>MedSys – Novi pregled</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+    <h1><a class="btn" href="/index.html">← Natrag</a> Novi pregled</h1>
+    <div class="card">
+        <form id="frm">
+            <div><b>PacijentId:</b> <span id="pid"></span></div>
+            <label>Datum/vrijeme<br><input id="when" type="datetime-local" required></label><br>
+            <label>
+                Tip<br>
+                <select id="type">
+                    <option>GP</option>
+                    <option>KRV</option>
+                    <option>X-RAY</option>
+                    <option>CT</option>
+                    <option>MR</option>
+                    <option>ULTRA</option>
+                    <option>EKG</option>
+                    <option>ECHO</option>
+                    <option>EYE</option>
+                    <option>DERM</option>
+                    <option>DENTA</option>
+                    <option>MAMMO</option>
+                    <option>NEURO</option>
+                </select>
+            </label><br>
+            <label>Bilješka<br><input id="notes"></label><br>
+            <button>Spremi</button>
+            <a id="back" class="btn" href="#">Odustani</a>
+        </form>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        const patientId = qparam('patientId');
+        qsel('#pid').textContent = patientId;
+        qsel('#back').href = `/patient.html?id=${patientId}`;
+
+        qsel('#frm').onsubmit = async (e) => {
+            e.preventDefault();
+            const body = {
+                patientId,
+                visitDateTime: new Date(qsel('#when').value).toISOString(),
+                visitType: qsel('#type').value,
+                notes: qsel('#notes').value
+            };
+            await apiPostJson('/api/visits', body);
+            location.href = `/patient.html?id=${patientId}`;
+        };
+    </script>
+    <script src="/js/api.js"></script>
+</body>
+</html>

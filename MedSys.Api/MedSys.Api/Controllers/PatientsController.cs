@@ -21,6 +21,14 @@ public class PatientsController : ControllerBase
         _factory = factory;
     }
 
+    // Helper: normaliziraj BirthDate na UTC date (za timestamptz kolonu)
+    private static DateTime ToUtcDate(DateTime d)
+    {
+        if (d.Kind == DateTimeKind.Unspecified)
+            return DateTime.SpecifyKind(d.Date, DateTimeKind.Utc);
+        return d.ToUniversalTime().Date;
+    }
+
     // GET /api/patients?lastName=&oib=
     [HttpGet]
     public async Task<ActionResult<List<PatientSummaryDto>>> Search([FromQuery] string? lastName, [FromQuery] string? oib)
@@ -74,8 +82,8 @@ public class PatientsController : ControllerBase
                           .ToList()
                     ))
                     .ToList(),
-                     v.DoctorId,                   
-        v.Doctor != null ? v.Doctor.FullName : null 
+                v.DoctorId,                               // ⬅︎ dodano
+                v.Doctor != null ? v.Doctor.FullName : null // ⬅︎ dodano
             ))
             .ToList();
 
@@ -91,7 +99,7 @@ public class PatientsController : ControllerBase
             FirstName = dto.FirstName.Trim(),
             LastName = dto.LastName.Trim(),
             OIB = dto.OIB.Trim(),
-            BirthDate = dto.BirthDate.Date,
+            BirthDate = ToUtcDate(dto.BirthDate), // fix timestamptz
             Sex = dto.Sex,
             PatientNumber = dto.PatientNumber
         };
@@ -99,8 +107,11 @@ public class PatientsController : ControllerBase
         var repo = _factory.Create<Patient>();
         await repo.AddAsync(p);
         await repo.SaveChangesAsync();
-        return CreatedAtAction(nameof(Get), new { id = p.Id }, new PatientSummaryDto(
-            p.Id, p.FirstName, p.LastName, p.OIB, p.BirthDate, p.Sex, p.PatientNumber));
+
+        var outDto = new PatientSummaryDto(
+            p.Id, p.FirstName, p.LastName, p.OIB, p.BirthDate, p.Sex, p.PatientNumber);
+
+        return CreatedAtAction(nameof(Get), new { id = p.Id }, outDto);
     }
 
     // PUT /api/patients/{id}
@@ -113,7 +124,7 @@ public class PatientsController : ControllerBase
         p.FirstName = dto.FirstName.Trim();
         p.LastName = dto.LastName.Trim();
         p.OIB = dto.OIB.Trim();
-        p.BirthDate = dto.BirthDate.Date;
+        p.BirthDate = ToUtcDate(dto.BirthDate); // fix timestamptz
         p.Sex = dto.Sex;
         p.PatientNumber = dto.PatientNumber;
 

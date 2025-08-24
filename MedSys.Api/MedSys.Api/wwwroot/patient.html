@@ -1,0 +1,107 @@
+﻿<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8" />
+    <title>MedSys – Pacijent</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+    <h1><a class="btn" href="/index.html">← Natrag</a> Pacijent</h1>
+
+    <div id="patient"></div>
+
+    <div class="card">
+        <h2>Povijest bolesti</h2>
+        <div id="mh"></div>
+        <form id="frmMh" class="row">
+            <div><label>Bolest<br><input id="mhName" required></label></div>
+            <div><label>Početak<br><input id="mhStart" type="date" required></label></div>
+            <div><label>Kraj<br><input id="mhEnd" type="date"></label></div>
+            <div style="align-self:end"><button>+ Dodaj</button></div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Pregledi</h2>
+        <div class="row">
+            <a id="newVisitLink" class="btn" href="#">+ Novi pregled</a>
+        </div>
+        <div id="visits"></div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        const id = qparam('id');
+        const container = {
+            head: qsel('#patient'),
+            mh: qsel('#mh'),
+            visits: qsel('#visits'),
+            newVisitLink: qsel('#newVisitLink')
+        };
+
+        async function load() {
+            const d = await apiGet(`/api/patients/${id}`);
+
+            const p = d.patient;
+            container.head.innerHTML =
+                `<div class="card">
+            <b>${p.firstName} ${p.lastName}</b> (OIB: ${p.oib})<br>
+            Rođen/a: ${p.birthDate?.slice(0, 10)} • Spol: ${p.sex}
+            ${p.patientNumber ? ' • Broj pacijenta: ' + p.patientNumber : ''}
+          </div>`;
+
+            container.mh.innerHTML =
+                `<table><thead><tr><th>Naziv</th><th>Početak</th><th>Kraj</th></tr></thead><tbody>${d.medicalHistory.map(x => `<tr><td>${x.diseaseName}</td><td>${x.startDate.slice(0, 10)}</td><td>${x.endDate ? x.endDate.slice(0, 10) : ''}</td></tr>`).join('')
+                }</tbody></table>`;
+
+            container.newVisitLink.href = `/visit-new.html?patientId=${p.id}`;
+
+            container.visits.innerHTML = d.visits.map(v => {
+                const docs = v.documents.length
+                    ? v.documents.map(doc => `<li><a href="${doc.storageUrl}" target="_blank">${doc.fileName}</a> (${Math.round(doc.sizeBytes / 1024)} KB)</li>`).join('')
+                    : '<li><i>nema</i></li>';
+                return `<div class="card">
+            <b>${v.visitType}</b> — ${new Date(v.visitDateTime).toLocaleString()}
+            ${v.doctorName ? ' • Liječnik: ' + v.doctorName : ''}<br>
+            <small>${v.notes || ''}</small>
+            <div style="margin-top:8px">
+              <input type="file" id="f_${v.id}">
+              <button data-vid="${v.id}" class="btn btn-upload">Upload dokument</button>
+            </div>
+            <div><b>Dokumenti:</b><ul>${docs}</ul></div>
+          </div>`;
+            }).join('');
+
+            // veži upload gumbe
+            document.querySelectorAll('.btn-upload').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.preventDefault();
+                    const vid = btn.dataset.vid;
+                    const file = document.getElementById(`f_${vid}`).files[0];
+                    if (!file) return alert('Odaberi datoteku');
+                    const fd = new FormData(); fd.append('file', file);
+                    await apiPostForm(`/api/visits/${vid}/documents`, fd);
+                    await load();
+                };
+            });
+        }
+
+        // dodavanje povijesti bolesti
+        qsel('#frmMh').onsubmit = async (e) => {
+            e.preventDefault();
+            const body = {
+                patientId: id,
+                diseaseName: qsel('#mhName').value,
+                startDate: qsel('#mhStart').value,
+                endDate: qsel('#mhEnd').value || null
+            };
+            await apiPostJson(`/api/patients/${id}/medicalhistory`, body);
+            e.target.reset();
+            await load();
+        };
+
+        load();
+    </script>
+    <script src="/js/api.js"></script>
+</body>
+</html>

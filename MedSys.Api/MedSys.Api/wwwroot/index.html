@@ -1,0 +1,50 @@
+﻿<!doctype html>
+<html lang="hr">
+<head>
+  <meta charset="utf-8" />
+  <title>MedSys – Pretraga pacijenata</title>
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+  <h1>MedSys</h1>
+  <nav>
+    <a class="btn" href="/index.html">Pacijenti</a>
+    <a class="btn" href="/api/patients/export.csv" target="_blank">Izvoz CSV</a>
+    <a class="btn" href="/swagger/index.html" target="_blank">Swagger</a>
+  </nav>
+
+  <div class="card">
+    <h2>Pretraga</h2>
+    <label>Prezime: <input id="qLast"></label>
+    <label>OIB: <input id="qOib" maxlength="11"></label>
+    <button id="btnSearch">Traži</button>
+    <div><small id="msg"></small></div>
+    <table>
+      <thead><tr><th>Ime</th><th>Prezime</th><th>OIB</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+  const rows = qsel('#rows'), msg = qsel('#msg');
+  qsel('#btnSearch').onclick = async () => {
+    const last = qsel('#qLast').value.trim();
+    const oib  = qsel('#qOib').value.trim();
+    const qs = new URLSearchParams();
+    if (last) qs.set('lastName', last);
+    if (oib)  qs.set('oib', oib);
+    const data = await apiGet('/api/patients' + (qs.toString()? ('?'+qs.toString()) : ''));
+    msg.textContent = `Pronađeno: ${data.length}`;
+    rows.innerHTML = data.map(p =>
+      `<tr>
+        <td>${p.firstName}</td>
+        <td>${p.lastName}</td>
+        <td>${p.oib}</td>
+        <td><a class="btn" href="/patient.html?id=${p.id}">Detalji</a></td>
+      </tr>`).join('');
+  };
+  </script>
+    <script src="/js/api.js"></script>
+</body>
+</html>

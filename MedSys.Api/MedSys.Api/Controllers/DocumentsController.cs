@@ -1,6 +1,7 @@
 ﻿using MedSys.Api.Data;
 using MedSys.Api.Dtos;
 using MedSys.Api.Models;
+using MedSys.Api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,23 +14,26 @@ namespace MedSys.Api.Controllers;
 public class DocumentsController : ControllerBase
 {
     private readonly AppDb _db;
-    public DocumentsController(AppDb db) => _db = db;
+    private readonly IStorageService _storage;
+    public DocumentsController(AppDb db, IStorageService storage)
+    {
+        _db = db;
+        _storage = storage;
+    }
 
     // POST /api/visits/{visitId}/documents
     [HttpPost]
     [Consumes("multipart/form-data")]
-    [RequestSizeLimit(50_000_000)] // 50 MB
-    [ProducesResponseType(typeof(DocumentDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Upload([FromRoute] Guid visitId, [FromForm] IFormFile file)
+    [RequestSizeLimit(50_000_000)]
+    public async Task<IActionResult> Upload(Guid visitId, [FromForm] IFormFile file, CancellationToken ct)
     {
-        var visit = await _db.Visits.AsNoTracking().FirstOrDefaultAsync(v => v.Id == visitId);
+        var visit = await _db.Visits.FindAsync(visitId);
         if (visit is null) return NotFound("Pregled ne postoji.");
         if (file is null || file.Length == 0) return BadRequest("Prazna datoteka.");
 
-        // TODO: stvarni upload u Supabase/S3 → dohvati URL
-        var fakeUrl = $"https://storage.example/visits/{visitId}/{file.FileName}";
+        var key = $"visits/{visitId}/{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+        await using var s = file.OpenReadStream();
+        var url = await _storage.UploadAsync(s, file.ContentType, key, ct);
 
         var doc = new Document
         {
@@ -37,13 +41,12 @@ public class DocumentsController : ControllerBase
             FileName = file.FileName,
             ContentType = file.ContentType ?? "application/octet-stream",
             SizeBytes = file.Length,
-            StorageUrl = fakeUrl
+            StorageUrl = url
         };
         _db.Documents.Add(doc);
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(ct);
 
-        var dto = new DocumentDto(doc.Id, doc.FileName, doc.ContentType, doc.SizeBytes, doc.StorageUrl, doc.UploadedAt);
-        return Ok(dto);
+        return Ok(new { doc.Id, doc.FileName, doc.ContentType, doc.SizeBytes, doc.StorageUrl, doc.UploadedAt });
     }
 
     // GET /api/visits/{visitId}/documents
