@@ -20,14 +20,17 @@ public class PatientsController : ControllerBase
         _db = db;
         _factory = factory;
     }
-
-    // Helper: normaliziraj BirthDate na UTC date (za timestamptz kolonu)
-    private static DateTime ToUtcDate(DateTime d)
+ 
+    private static DateTime AsUtcDate(DateTime d)
     {
+     
         if (d.Kind == DateTimeKind.Unspecified)
             return DateTime.SpecifyKind(d.Date, DateTimeKind.Utc);
+
         return d.ToUniversalTime().Date;
     }
+
+   
 
     // GET /api/patients?lastName=&oib=
     [HttpGet]
@@ -82,8 +85,8 @@ public class PatientsController : ControllerBase
                           .ToList()
                     ))
                     .ToList(),
-                v.DoctorId,                               // ⬅︎ dodano
-                v.Doctor != null ? v.Doctor.FullName : null // ⬅︎ dodano
+                v.DoctorId,                             
+                v.Doctor != null ? v.Doctor.FullName : null 
             ))
             .ToList();
 
@@ -99,7 +102,7 @@ public class PatientsController : ControllerBase
             FirstName = dto.FirstName.Trim(),
             LastName = dto.LastName.Trim(),
             OIB = dto.OIB.Trim(),
-            BirthDate = AsUtcDate(dto.BirthDate), // fix timestamptz
+            BirthDate = AsUtcDate(dto.BirthDate), 
             Sex = dto.Sex,
             PatientNumber = dto.PatientNumber
         };
@@ -124,7 +127,7 @@ public class PatientsController : ControllerBase
         p.FirstName = dto.FirstName.Trim();
         p.LastName = dto.LastName.Trim();
         p.OIB = dto.OIB.Trim();
-        p.BirthDate = AsUtcDate(dto.BirthDate); // fix timestamptz
+        p.BirthDate = AsUtcDate(dto.BirthDate); 
         p.Sex = dto.Sex;
         p.PatientNumber = dto.PatientNumber;
 
@@ -144,18 +147,63 @@ public class PatientsController : ControllerBase
     }
 
     // GET /api/patients/export.csv
-    [HttpGet("export.csv")]
-    public async Task<IActionResult> ExportCsv()
+    [HttpGet("{id:guid}/export.csv")]
+    public async Task<IActionResult> ExportPatientCsv(Guid id)
     {
-        var pts = await _db.Patients.AsNoTracking().ToListAsync();
+        var p = await _db.Patients
+            .Include(x => x.MedicalHistory)
+            .Include(x => x.Visits).ThenInclude(v => v.Doctor)
+            .Include(x => x.Visits).ThenInclude(v => v.Documents)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (p == null) return NotFound();
+
+        string Q(string? s) => $"\"{(s ?? string.Empty).Replace("\"", "\"\"")}\"";
+
         var sb = new StringBuilder();
-        sb.AppendLine("Id,FirstName,LastName,OIB,BirthDate,Sex,PatientNumber");
-        foreach (var p in pts)
-            sb.AppendLine($"{p.Id},{p.FirstName},{p.LastName},{p.OIB},{p.BirthDate:yyyy-MM-dd},{p.Sex},{p.PatientNumber}");
-        return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv", "patients.csv");
+
+        // 1) Osobni podaci (bez ID-eva)
+        sb.AppendLine("Pacijent,OIB,Datum rođenja,Spol,Broj pacijenta");
+        sb.AppendLine($"{Q($"{p.FirstName} {p.LastName}")},{Q(p.OIB)},{p.BirthDate:yyyy-MM-dd},{Q(p.Sex)},{Q(p.PatientNumber)}");
+        sb.AppendLine();
+
+        // 2) Povijest bolesti
+        sb.AppendLine("Povijest bolesti");
+        sb.AppendLine("Naziv,Početak,Kraj");
+        foreach (var h in p.MedicalHistory.OrderByDescending(h => h.StartDate))
+            sb.AppendLine($"{Q(h.DiseaseName)},{h.StartDate:yyyy-MM-dd},{(h.EndDate.HasValue ? h.EndDate.Value.ToString("yyyy-MM-dd") : "")}");
+        sb.AppendLine();
+
+        // 3) Pregledi
+        sb.AppendLine("Pregledi");
+        sb.AppendLine("Datum/vrijeme,Tip,Liječnik,Bilješka,Dokumenti");
+        foreach (var v in p.Visits.OrderByDescending(v => v.VisitDateTime))
+        {
+            var doctor = v.Doctor?.FullName ?? "";
+            var docs = v.Documents.Any()
+                ? string.Join(" | ", v.Documents.Select(d => d.FileName))
+                : "";
+            sb.AppendLine($"{v.VisitDateTime:yyyy-MM-dd HH:mm},{Q(v.VisitType)},{Q(doctor)},{Q(v.Notes)},{Q(docs)}");
+        }
+        sb.AppendLine();
+
+        // 4) Dokumenti pacijenta (ako ih imate na razini pacijenta)
+        // Ako dokumente spremate u istu tablicu s kolonom PatientId:
+        var patientDocs = await _db.Documents
+            .Where(d => d.PatientId == id) // prilagodi ako je drugačiji model
+            .OrderByDescending(d => d.UploadedAt)
+            .ToListAsync();
+
+        if (patientDocs.Any())
+        {
+            sb.AppendLine("Dokumenti pacijenta");
+            sb.AppendLine("Naziv,Veličina (B),Uploadano");
+            foreach (var d in patientDocs)
+                sb.AppendLine($"{Q(d.FileName)},{d.SizeBytes},{d.UploadedAt:yyyy-MM-dd HH:mm}");
+        }
+
+        var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+        var fileName = $"pacijent_{p.LastName}_{p.FirstName}.csv";
+        return File(bytes, "text/csv; charset=utf-8", fileName);
     }
-
-    private static DateTime AsUtcDate(DateTime d)
-    => DateTime.SpecifyKind(d.Date, DateTimeKind.Utc);
-
 }

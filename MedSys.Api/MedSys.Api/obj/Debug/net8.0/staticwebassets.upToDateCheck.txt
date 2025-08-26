@@ -1,5 +1,5 @@
 wwwroot\css\Site.css
 wwwroot\index.html
 wwwroot\js\api.js
-wwwroot\patient.html
 wwwroot\visit-new.html
+wwwroot\patient.html

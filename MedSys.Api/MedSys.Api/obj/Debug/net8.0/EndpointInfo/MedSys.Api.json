@@ -405,6 +405,15 @@
         "tags": [
           "Medications"
         ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -413,7 +422,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MedSys.Api.Models.Medication"
+                    "$ref": "#/components/schemas/MedSys.Api.Dtos.MedicationReadDto"
                   }
                 }
               },
@@ -421,7 +430,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MedSys.Api.Models.Medication"
+                    "$ref": "#/components/schemas/MedSys.Api.Dtos.MedicationReadDto"
                   }
                 }
               },
@@ -429,7 +438,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MedSys.Api.Models.Medication"
+                    "$ref": "#/components/schemas/MedSys.Api.Dtos.MedicationReadDto"
                   }
                 }
               }
@@ -445,17 +454,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MedSys.Api.Models.Medication"
+                "$ref": "#/components/schemas/MedSys.Api.Dtos.MedicationCreateDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/MedSys.Api.Models.Medication"
+                "$ref": "#/components/schemas/MedSys.Api.Dtos.MedicationCreateDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/MedSys.Api.Models.Medication"
+                "$ref": "#/components/schemas/MedSys.Api.Dtos.MedicationCreateDto"
               }
             }
           }
@@ -467,45 +476,19 @@
         }
       }
     },
-    "/api/Medications/{id}": {
-      "get": {
+    "/api/Medications/seed": {
+      "post": {
         "tags": [
           "Medications"
         ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/MedSys.Api.Models.Medication"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MedSys.Api.Models.Medication"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MedSys.Api.Models.Medication"
-                }
-              }
-            }
+            "description": "Success"
           }
         }
-      },
+      }
+    },
+    "/api/Medications/{id}": {
       "put": {
         "tags": [
           "Medications"
@@ -558,27 +541,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Medications/search": {
-      "get": {
-        "tags": [
-          "Medications"
-        ],
-        "parameters": [
-          {
-            "name": "q",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -883,10 +845,21 @@
         }
       }
     },
-    "/api/Patients/export.csv": {
+    "/api/Patients/{id}/export.csv": {
       "get": {
         "tags": [
           "Patients"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -1090,6 +1063,36 @@
         },
         "additionalProperties": false
       },
+      "MedSys.Api.Dtos.MedicationCreateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "atcCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MedSys.Api.Dtos.MedicationReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "atcCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "MedSys.Api.Dtos.PatientDetailsDto": {
         "type": "object",
         "properties": {
@@ -1206,8 +1209,14 @@
       "MedSys.Api.Dtos.PrescriptionItemCreateDto": {
         "type": "object",
         "properties": {
+          "medicationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "medicationName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "dosage": {
             "type": "string"
@@ -1217,8 +1226,7 @@
           },
           "durationDays": {
             "type": "integer",
-            "format": "int32",
-            "nullable": true
+            "format": "int32"
           }
         },
         "additionalProperties": false
