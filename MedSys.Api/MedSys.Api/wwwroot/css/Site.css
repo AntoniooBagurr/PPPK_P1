@@ -54,3 +54,12 @@ a.btn {
     border-radius: 8px;
     text-decoration: none
 }
+
+.form-inline {
+    gap: 8px;
+    align-items: end;
+    justify-content: flex-start; 
+    flex-wrap: wrap;
+    margin: 6px 0 10px;
+}
+

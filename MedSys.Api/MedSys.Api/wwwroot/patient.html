@@ -4,8 +4,9 @@
     <meta charset="utf-8" />
     <title>MedSys – Pacijent</title>
     <link rel="stylesheet" href="/css/site.css">
-    <!-- VAŽNO: api.js prije našeg inline koda + cache-busting -->
-    <script src="/js/api.js?v=2" defer></script>
+
+    <!-- Uvjere se da se učita util JS (qparam, apiGet, toast, fmtDate...) -->
+    <script src="/js/api.js?v=4" defer></script>
 
     <script defer>
         document.addEventListener('DOMContentLoaded', () => {
@@ -40,7 +41,6 @@
                                 `<a href="${doc.storageUrl}" target="_blank">${esc(doc.fileName)}</a> (${toSize(doc.sizeBytes)})`
                             ).join('<br>')
                             : '<i>nema</i>');
-
                         return [
                             `${esc(v.visitType)} — ${fmtDateTime(v.visitDateTime)}`,
                             v.doctorName ?? '',
@@ -51,26 +51,48 @@
                     fillTable('#tblVisits', visitRows);
 
                 } catch (err) {
-                    // Ako API vrati 404/500 ovo će se prikazati umjesto “tihe” prazne forme
                     toast(err?.message || 'Greška pri dohvaćanju podataka.');
                 }
             }
 
-            // Dodavanje povijesti bolesti
+            // Dodavanje POVIJESTI BOLESTI
             qsel('#frmMh').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 try {
                     const body = {
                         patientId: id,
                         diseaseName: qsel('#mhName').value.trim(),
-                        startDate: qsel('#mhStart').value,
-                        endDate: qsel('#mhEnd').value || null
+                        startDate: qsel('#mhStart').value,      // yyyy-MM-dd
+                        endDate: qsel('#mhEnd').value || null   // ili null
                     };
                     await apiPostJson(`/api/patients/${id}/medicalhistory`, body);
                     e.target.reset();
                     await load();
                 } catch (err) {
                     toast(err?.message || 'Greška pri spremanju.');
+                }
+            });
+
+            // Dodavanje PREGLEDA (forma ispod naslova, poravnata lijevo)
+            qsel('#frmVisitNew').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                try {
+                    const whenVal = qsel('#vWhen').value;
+                    if (!whenVal) return toast('Odaberi datum/vrijeme.');
+                    const whenIso = new Date(whenVal).toISOString(); // u UTC
+
+                    const body = {
+                        patientId: id,
+                        visitDateTime: whenIso,
+                        visitType: qsel('#vType').value,
+                        notes: qsel('#vNotes').value || null,
+                        doctorId: null
+                    };
+                    await apiPostJson('/api/visits', body);
+                    e.target.reset();
+                    await load();
+                } catch (err) {
+                    toast(err?.message || 'Greška pri dodavanju pregleda.');
                 }
             });
 
@@ -95,6 +117,7 @@
 
         <section class="card">
             <h3>Povijest bolesti</h3>
+
             <table class="table" id="tblMh">
                 <thead><tr><th>Naziv</th><th>Početak</th><th>Kraj</th></tr></thead>
                 <tbody></tbody>
@@ -110,6 +133,39 @@
 
         <section class="card">
             <h3>Pregledi</h3>
+
+            <!-- Forma poravnata lijevo, odmah ispod naslova -->
+            <form id="frmVisitNew" class="row"
+                  style="gap:8px; align-items:end; justify-content:flex-start; flex-wrap:wrap; margin:6px 0 10px;">
+                <label>
+                    Datum/vrijeme<br>
+                    <input id="vWhen" type="datetime-local" required>
+                </label>
+                <label>
+                    Tip<br>
+                    <select id="vType">
+                        <option>GP</option>
+                        <option>KRV</option>
+                        <option>X-RAY</option>
+                        <option>CT</option>
+                        <option>MR</option>
+                        <option>ULTRA</option>
+                        <option>EKG</option>
+                        <option>ECHO</option>
+                        <option>EYE</option>
+                        <option>DERM</option>
+                        <option>DENTA</option>
+                        <option>MAMMO</option>
+                        <option>NEURO</option>
+                    </select>
+                </label>
+                <label>
+                    Bilješka<br>
+                    <input id="vNotes" placeholder="opcionalno">
+                </label>
+                <button class="btn">+ Novi pregled</button>
+            </form>
+
             <table class="table" id="tblVisits">
                 <thead>
                     <tr><th>Pregled</th><th>Liječnik</th><th>Bilješka</th><th>Dokumenti</th></tr>

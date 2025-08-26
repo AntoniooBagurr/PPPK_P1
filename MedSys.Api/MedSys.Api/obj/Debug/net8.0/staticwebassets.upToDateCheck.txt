@@ -1,5 +1,5 @@
-wwwroot\css\Site.css
-wwwroot\visit-new.html
-wwwroot\patient.html
-wwwroot\js\api.js
 wwwroot\index.html
+wwwroot\js\api.js
+wwwroot\visit-new.html
+wwwroot\css\Site.css
+wwwroot\patient.html
