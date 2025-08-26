@@ -10,9 +10,11 @@ namespace MedSys.Api.Models
         public string OIB { get; set; } = default!;
         public DateTime BirthDate { get; set; }
         public string Sex { get; set; } = default!; // 'M' ili 'F'
-        public string? PatientNumber { get; set; }   // dodati migracijom kasnije (Ishod 5)
+        public string? PatientNumber { get; set; }   
 
         [JsonIgnore] public virtual ICollection<MedicalHistory> MedicalHistory { get; set; } = new List<MedicalHistory>();
         [JsonIgnore] public virtual ICollection<Visit> Visits { get; set; } = new List<Visit>();
+        [JsonIgnore] public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
+
     }
 }

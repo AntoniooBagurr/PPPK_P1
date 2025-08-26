@@ -1,9 +1,11 @@
-using System.Text.Json.Serialization;
 using MedSys.Api.Data;
 using MedSys.Api.Repositories;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using MedSys.Api.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,10 @@ builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSingleton<IStorageService, SupabaseStorageService>();
+
+builder.Services.AddScoped<IStorageService, LocalDiskStorageService>();
+
+//builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(o =>
@@ -53,6 +59,13 @@ app.Use(async (ctx, next) =>
     }
 });
 
+var uploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads");
+Directory.CreateDirectory(uploadsRoot);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsRoot),
+    RequestPath = "/uploads"
+});
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDb>();

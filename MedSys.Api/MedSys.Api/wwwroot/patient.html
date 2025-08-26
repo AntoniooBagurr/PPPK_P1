@@ -4,15 +4,12 @@
     <meta charset="utf-8" />
     <title>MedSys – Pacijent</title>
     <link rel="stylesheet" href="/css/site.css">
-
-    <!-- Uvjere se da se učita util JS (qparam, apiGet, toast, fmtDate...) -->
-    <script src="/js/api.js?v=4" defer></script>
+    <script src="/js/api.js?v=5" defer></script>
 
     <script defer>
         document.addEventListener('DOMContentLoaded', () => {
             const id = qparam('id');
             if (!id) { toast('Nedostaje ?id=... u URL-u'); return; }
-
             qsel('#back').href = '/index.html';
 
             async function load() {
@@ -50,20 +47,34 @@
                     });
                     fillTable('#tblVisits', visitRows);
 
+                    // Dokumenti pacijenta
+                    await loadPatientDocs();
                 } catch (err) {
                     toast(err?.message || 'Greška pri dohvaćanju podataka.');
                 }
             }
 
-            // Dodavanje POVIJESTI BOLESTI
+            async function loadPatientDocs() {
+                const docs = await apiGet(`/api/patients/${id}/documents`);
+                const list = qsel('#patientDocs');
+                if (!docs.length) {
+                    list.innerHTML = '<li><i>nema</i></li>';
+                    return;
+                }
+                list.innerHTML = docs.map(d =>
+                    `<li><a href="${d.storageUrl}" target="_blank">${esc(d.fileName)}</a> — ${toSize(d.sizeBytes)} <small>(${fmtDateTime(d.uploadedAt)})</small></li>`
+                ).join('');
+            }
+
+            // Povijest bolesti - submit
             qsel('#frmMh').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 try {
                     const body = {
                         patientId: id,
                         diseaseName: qsel('#mhName').value.trim(),
-                        startDate: qsel('#mhStart').value,      // yyyy-MM-dd
-                        endDate: qsel('#mhEnd').value || null   // ili null
+                        startDate: qsel('#mhStart').value,
+                        endDate: qsel('#mhEnd').value || null
                     };
                     await apiPostJson(`/api/patients/${id}/medicalhistory`, body);
                     e.target.reset();
@@ -73,13 +84,13 @@
                 }
             });
 
-            // Dodavanje PREGLEDA (forma ispod naslova, poravnata lijevo)
+            // Pregled - submit
             qsel('#frmVisitNew').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 try {
                     const whenVal = qsel('#vWhen').value;
                     if (!whenVal) return toast('Odaberi datum/vrijeme.');
-                    const whenIso = new Date(whenVal).toISOString(); // u UTC
+                    const whenIso = new Date(whenVal).toISOString();
 
                     const body = {
                         patientId: id,
@@ -94,6 +105,18 @@
                 } catch (err) {
                     toast(err?.message || 'Greška pri dodavanju pregleda.');
                 }
+            });
+
+            // Upload DOKUMENTA PACIJENTA
+            qsel('#btnUploadPatientDoc').addEventListener('click', async (e) => {
+                e.preventDefault();
+                const f = qsel('#pf_file').files[0];
+                if (!f) return toast('Odaberi datoteku.');
+                const fd = new FormData();
+                fd.append('file', f);
+                await apiPostForm(`/api/patients/${id}/documents`, fd);
+                qsel('#pf_file').value = '';
+                await loadPatientDocs();
             });
 
             load();
@@ -134,7 +157,6 @@
         <section class="card">
             <h3>Pregledi</h3>
 
-            <!-- Forma poravnata lijevo, odmah ispod naslova -->
             <form id="frmVisitNew" class="row"
                   style="gap:8px; align-items:end; justify-content:flex-start; flex-wrap:wrap; margin:6px 0 10px;">
                 <label>
@@ -172,6 +194,17 @@
                 </thead>
                 <tbody></tbody>
             </table>
+        </section>
+
+        <section class="card">
+            <h3>Dokumenti pacijenta</h3>
+            <div class="row" style="align-items:center; gap:8px; margin:6px 0 10px;">
+                <input type="file" id="pf_file">
+                <button class="btn" id="btnUploadPatientDoc">Upload dokument</button>
+            </div>
+            <ul id="patientDocs" class="plain">
+                <!-- popunjava se iz JS-a -->
+            </ul>
         </section>
     </main>
 </body>

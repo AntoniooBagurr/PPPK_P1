@@ -1,5 +1,6 @@
 ﻿using MedSys.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace MedSys.Api.Data;
 
@@ -54,6 +55,27 @@ public class AppDb : DbContext
             .WithMany(d => d.Visits)
             .HasForeignKey(v => v.DoctorId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        b.Entity<Document>(e =>
+        {
+            e.HasKey(d => d.Id);
+
+            e.HasOne(d => d.Visit)
+             .WithMany(v => v.Documents)
+             .HasForeignKey(d => d.VisitId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(d => d.Patient)
+             .WithMany(p => p.Documents)
+             .HasForeignKey(d => d.PatientId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(d => d.PatientId);
+            e.HasIndex(d => d.VisitId);
+
+            e.Property(d => d.UploadedAt).HasDefaultValueSql("now()");
+        });
+
 
 
     }
