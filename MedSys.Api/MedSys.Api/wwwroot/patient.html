@@ -4,104 +4,119 @@
     <meta charset="utf-8" />
     <title>MedSys – Pacijent</title>
     <link rel="stylesheet" href="/css/site.css">
+    <!-- VAŽNO: api.js prije našeg inline koda + cache-busting -->
+    <script src="/js/api.js?v=2" defer></script>
+
+    <script defer>
+        document.addEventListener('DOMContentLoaded', () => {
+            const id = qparam('id');
+            if (!id) { toast('Nedostaje ?id=... u URL-u'); return; }
+
+            qsel('#back').href = '/index.html';
+
+            async function load() {
+                try {
+                    const d = await apiGet(`/api/patients/${id}`);
+                    const p = d.patient;
+
+                    // Header
+                    qsel('#title').textContent = `${p.firstName} ${p.lastName}`;
+                    qsel('#pInfo').textContent =
+                        `OIB: ${p.oib} • Rođen/a: ${fmtDate(p.birthDate)} • Spol: ${p.sex}` +
+                        (p.patientNumber ? ` • Broj pacijenta: ${p.patientNumber}` : '');
+
+                    // Povijest bolesti
+                    const mhRows = (d.medicalHistory ?? []).map(x => [
+                        x.diseaseName,
+                        fmtDate(x.startDate),
+                        x.endDate ? fmtDate(x.endDate) : ''
+                    ]);
+                    fillTable('#tblMh', mhRows);
+
+                    // Pregledi
+                    const visitRows = (d.visits ?? []).map(v => {
+                        const docsHtml = (v.documents?.length
+                            ? v.documents.map(doc =>
+                                `<a href="${doc.storageUrl}" target="_blank">${esc(doc.fileName)}</a> (${toSize(doc.sizeBytes)})`
+                            ).join('<br>')
+                            : '<i>nema</i>');
+
+                        return [
+                            `${esc(v.visitType)} — ${fmtDateTime(v.visitDateTime)}`,
+                            v.doctorName ?? '',
+                            v.notes ?? '',
+                            { __html: docsHtml }
+                        ];
+                    });
+                    fillTable('#tblVisits', visitRows);
+
+                } catch (err) {
+                    // Ako API vrati 404/500 ovo će se prikazati umjesto “tihe” prazne forme
+                    toast(err?.message || 'Greška pri dohvaćanju podataka.');
+                }
+            }
+
+            // Dodavanje povijesti bolesti
+            qsel('#frmMh').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                try {
+                    const body = {
+                        patientId: id,
+                        diseaseName: qsel('#mhName').value.trim(),
+                        startDate: qsel('#mhStart').value,
+                        endDate: qsel('#mhEnd').value || null
+                    };
+                    await apiPostJson(`/api/patients/${id}/medicalhistory`, body);
+                    e.target.reset();
+                    await load();
+                } catch (err) {
+                    toast(err?.message || 'Greška pri spremanju.');
+                }
+            });
+
+            load();
+        });
+    </script>
 </head>
 <body>
-    <h1><a class="btn" href="/index.html">← Natrag</a> Pacijent</h1>
+    <header class="nav">
+        <h1><a id="back" class="btn ghost" href="#">← Natrag</a></h1>
+        <nav>
+            <a class="btn" href="/index.html">Pacijenti</a>
+            <a class="btn ghost" href="/swagger" target="_blank" rel="noopener">Swagger</a>
+        </nav>
+    </header>
 
-    <div id="patient"></div>
+    <main class="stack">
+        <section class="card">
+            <h2 id="title">Pacijent</h2>
+            <div id="pInfo" class="muted"></div>
+        </section>
 
-    <div class="card">
-        <h2>Povijest bolesti</h2>
-        <div id="mh"></div>
-        <form id="frmMh" class="row">
-            <div><label>Bolest<br><input id="mhName" required></label></div>
-            <div><label>Početak<br><input id="mhStart" type="date" required></label></div>
-            <div><label>Kraj<br><input id="mhEnd" type="date"></label></div>
-            <div style="align-self:end"><button>+ Dodaj</button></div>
-        </form>
-    </div>
+        <section class="card">
+            <h3>Povijest bolesti</h3>
+            <table class="table" id="tblMh">
+                <thead><tr><th>Naziv</th><th>Početak</th><th>Kraj</th></tr></thead>
+                <tbody></tbody>
+            </table>
 
-    <div class="card">
-        <h2>Pregledi</h2>
-        <div class="row">
-            <a id="newVisitLink" class="btn" href="#">+ Novi pregled</a>
-        </div>
-        <div id="visits"></div>
-    </div>
+            <form id="frmMh" class="row" style="margin-top:12px">
+                <label>Bolest<br><input id="mhName" required></label>
+                <label>Početak<br><input id="mhStart" type="date" required></label>
+                <label>Kraj<br><input id="mhEnd" type="date"></label>
+                <button class="btn">+ Dodaj</button>
+            </form>
+        </section>
 
-    <script src="/js/api.js"></script>
-    <script>
-        const id = qparam('id');
-        const container = {
-            head: qsel('#patient'),
-            mh: qsel('#mh'),
-            visits: qsel('#visits'),
-            newVisitLink: qsel('#newVisitLink')
-        };
-
-        async function load() {
-            const d = await apiGet(`/api/patients/${id}`);
-
-            const p = d.patient;
-            container.head.innerHTML =
-                `<div class="card">
-            <b>${p.firstName} ${p.lastName}</b> (OIB: ${p.oib})<br>
-            Rođen/a: ${p.birthDate?.slice(0, 10)} • Spol: ${p.sex}
-            ${p.patientNumber ? ' • Broj pacijenta: ' + p.patientNumber : ''}
-          </div>`;
-
-            container.mh.innerHTML =
-                `<table><thead><tr><th>Naziv</th><th>Početak</th><th>Kraj</th></tr></thead><tbody>${d.medicalHistory.map(x => `<tr><td>${x.diseaseName}</td><td>${x.startDate.slice(0, 10)}</td><td>${x.endDate ? x.endDate.slice(0, 10) : ''}</td></tr>`).join('')
-                }</tbody></table>`;
-
-            container.newVisitLink.href = `/visit-new.html?patientId=${p.id}`;
-
-            container.visits.innerHTML = d.visits.map(v => {
-                const docs = v.documents.length
-                    ? v.documents.map(doc => `<li><a href="${doc.storageUrl}" target="_blank">${doc.fileName}</a> (${Math.round(doc.sizeBytes / 1024)} KB)</li>`).join('')
-                    : '<li><i>nema</i></li>';
-                return `<div class="card">
-            <b>${v.visitType}</b> — ${new Date(v.visitDateTime).toLocaleString()}
-            ${v.doctorName ? ' • Liječnik: ' + v.doctorName : ''}<br>
-            <small>${v.notes || ''}</small>
-            <div style="margin-top:8px">
-              <input type="file" id="f_${v.id}">
-              <button data-vid="${v.id}" class="btn btn-upload">Upload dokument</button>
-            </div>
-            <div><b>Dokumenti:</b><ul>${docs}</ul></div>
-          </div>`;
-            }).join('');
-
-            // veži upload gumbe
-            document.querySelectorAll('.btn-upload').forEach(btn => {
-                btn.onclick = async (e) => {
-                    e.preventDefault();
-                    const vid = btn.dataset.vid;
-                    const file = document.getElementById(`f_${vid}`).files[0];
-                    if (!file) return alert('Odaberi datoteku');
-                    const fd = new FormData(); fd.append('file', file);
-                    await apiPostForm(`/api/visits/${vid}/documents`, fd);
-                    await load();
-                };
-            });
-        }
-
-        // dodavanje povijesti bolesti
-        qsel('#frmMh').onsubmit = async (e) => {
-            e.preventDefault();
-            const body = {
-                patientId: id,
-                diseaseName: qsel('#mhName').value,
-                startDate: qsel('#mhStart').value,
-                endDate: qsel('#mhEnd').value || null
-            };
-            await apiPostJson(`/api/patients/${id}/medicalhistory`, body);
-            e.target.reset();
-            await load();
-        };
-
-        load();
-    </script>
-    <script src="/js/api.js"></script>
+        <section class="card">
+            <h3>Pregledi</h3>
+            <table class="table" id="tblVisits">
+                <thead>
+                    <tr><th>Pregled</th><th>Liječnik</th><th>Bilješka</th><th>Dokumenti</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
 </body>
 </html>

@@ -90,6 +90,121 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "MedSys.Api.Controllers.MedicationsController",
+    "Method": "GetAll",
+    "RelativePath": "api/Medications",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[MedSys.Api.Models.Medication, MedSys.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "MedSys.Api.Controllers.MedicationsController",
+    "Method": "Create",
+    "RelativePath": "api/Medications",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "input",
+        "Type": "MedSys.Api.Models.Medication",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MedSys.Api.Controllers.MedicationsController",
+    "Method": "Get",
+    "RelativePath": "api/Medications/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "MedSys.Api.Models.Medication",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "MedSys.Api.Controllers.MedicationsController",
+    "Method": "Update",
+    "RelativePath": "api/Medications/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "input",
+        "Type": "MedSys.Api.Models.Medication",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MedSys.Api.Controllers.MedicationsController",
+    "Method": "Delete",
+    "RelativePath": "api/Medications/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MedSys.Api.Controllers.MedicationsController",
+    "Method": "Search",
+    "RelativePath": "api/Medications/search",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "q",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "MedSys.Api.Controllers.PatientsController",
     "Method": "Search",
     "RelativePath": "api/Patients",
@@ -294,6 +409,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "MedSys.Api.Controllers.PrescriptionsController",
+    "Method": "Create",
+    "RelativePath": "api/Prescriptions",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "MedSys.Api.Dtos.PrescriptionCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "MedSys.Api.Controllers.VisitsController",
     "Method": "Create",
     "RelativePath": "api/Visits",
@@ -394,89 +525,5 @@
         "StatusCode": 200
       }
     ]
-  },
-  {
-    "ContainingType": "MedSys.Api.Controllers.PrescriptionsController",
-    "Method": "List",
-    "RelativePath": "api/visits/{visitId}/Prescriptions",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "visitId",
-        "Type": "System.Guid",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "MedSys.Api.Controllers.PrescriptionsController",
-    "Method": "Create",
-    "RelativePath": "api/visits/{visitId}/Prescriptions",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "visitId",
-        "Type": "System.Guid",
-        "IsRequired": true
-      },
-      {
-        "Name": "dto",
-        "Type": "MedSys.Api.Dtos.PrescriptionCreateDto",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "MedSys.Api.Controllers.PrescriptionsController",
-    "Method": "Delete",
-    "RelativePath": "api/visits/{visitId}/Prescriptions/{id}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "visitId",
-        "Type": "System.Guid",
-        "IsRequired": true
-      },
-      {
-        "Name": "id",
-        "Type": "System.Guid",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "MedSys.Api.Controllers.PrescriptionsController",
-    "Method": "AddItem",
-    "RelativePath": "api/visits/{visitId}/Prescriptions/{id}/items",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "visitId",
-        "Type": "System.Guid",
-        "IsRequired": true
-      },
-      {
-        "Name": "id",
-        "Type": "System.Guid",
-        "IsRequired": true
-      },
-      {
-        "Name": "dto",
-        "Type": "MedSys.Api.Dtos.PrescriptionItemCreateDto",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
   }
 ]

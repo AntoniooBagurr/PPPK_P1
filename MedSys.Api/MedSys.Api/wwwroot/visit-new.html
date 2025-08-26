@@ -4,16 +4,30 @@
     <meta charset="utf-8" />
     <title>MedSys – Novi pregled</title>
     <link rel="stylesheet" href="/css/site.css">
+    <script defer src="/js/api.js"></script>
+    <script defer>
+        document.addEventListener('DOMContentLoaded', () => {
+            const patientId = qparam('patientId');
+            if (!patientId) { location.href = '/index.html'; return; }
+            qsel('#frm').action = `/ui/patients/${patientId}/visits`;
+            qsel('#back').href = `/patient.html?id=${patientId}`;
+            qsel('#pid').textContent = patientId;
+        });
+    </script>
 </head>
 <body>
-    <h1><a class="btn" href="/index.html">← Natrag</a> Novi pregled</h1>
-    <div class="card">
-        <form id="frm">
+    <header class="nav">
+        <h1><a id="back" class="btn ghost" href="#">← Natrag</a></h1>
+    </header>
+
+    <main class="card">
+        <h2>Novi pregled</h2>
+        <form id="frm" method="post" class="row">
             <div><b>PacijentId:</b> <span id="pid"></span></div>
-            <label>Datum/vrijeme<br><input id="when" type="datetime-local" required></label><br>
+            <label>Datum/vrijeme<br><input name="visitDateTime" type="datetime-local" required></label>
             <label>
                 Tip<br>
-                <select id="type">
+                <select name="visitType">
                     <option>GP</option>
                     <option>KRV</option>
                     <option>X-RAY</option>
@@ -28,31 +42,10 @@
                     <option>MAMMO</option>
                     <option>NEURO</option>
                 </select>
-            </label><br>
-            <label>Bilješka<br><input id="notes"></label><br>
-            <button>Spremi</button>
-            <a id="back" class="btn" href="#">Odustani</a>
+            </label>
+            <label>Bilješka<br><input name="notes"></label>
+            <div style="align-self:end"><button class="btn">Spremi</button></div>
         </form>
-    </div>
-
-    <script src="/js/api.js"></script>
-    <script>
-        const patientId = qparam('patientId');
-        qsel('#pid').textContent = patientId;
-        qsel('#back').href = `/patient.html?id=${patientId}`;
-
-        qsel('#frm').onsubmit = async (e) => {
-            e.preventDefault();
-            const body = {
-                patientId,
-                visitDateTime: new Date(qsel('#when').value).toISOString(),
-                visitType: qsel('#type').value,
-                notes: qsel('#notes').value
-            };
-            await apiPostJson('/api/visits', body);
-            location.href = `/patient.html?id=${patientId}`;
-        };
-    </script>
-    <script src="/js/api.js"></script>
+    </main>
 </body>
 </html>
