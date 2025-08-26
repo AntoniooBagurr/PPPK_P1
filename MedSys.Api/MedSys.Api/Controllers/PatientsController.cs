@@ -99,7 +99,7 @@ public class PatientsController : ControllerBase
             FirstName = dto.FirstName.Trim(),
             LastName = dto.LastName.Trim(),
             OIB = dto.OIB.Trim(),
-            BirthDate = ToUtcDate(dto.BirthDate), // fix timestamptz
+            BirthDate = AsUtcDate(dto.BirthDate), // fix timestamptz
             Sex = dto.Sex,
             PatientNumber = dto.PatientNumber
         };
@@ -124,7 +124,7 @@ public class PatientsController : ControllerBase
         p.FirstName = dto.FirstName.Trim();
         p.LastName = dto.LastName.Trim();
         p.OIB = dto.OIB.Trim();
-        p.BirthDate = ToUtcDate(dto.BirthDate); // fix timestamptz
+        p.BirthDate = AsUtcDate(dto.BirthDate); // fix timestamptz
         p.Sex = dto.Sex;
         p.PatientNumber = dto.PatientNumber;
 
@@ -154,4 +154,8 @@ public class PatientsController : ControllerBase
             sb.AppendLine($"{p.Id},{p.FirstName},{p.LastName},{p.OIB},{p.BirthDate:yyyy-MM-dd},{p.Sex},{p.PatientNumber}");
         return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv", "patients.csv");
     }
+
+    private static DateTime AsUtcDate(DateTime d)
+    => DateTime.SpecifyKind(d.Date, DateTimeKind.Utc);
+
 }

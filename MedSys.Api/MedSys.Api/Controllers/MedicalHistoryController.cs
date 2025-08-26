@@ -7,12 +7,17 @@ using Microsoft.EntityFrameworkCore;
 namespace MedSys.Api.Controllers;
 
 [ApiController]
-[Route("api/patients/{patientId:guid}/[controller]")]
+[Route("api/patients/{patientId:guid}/medicalhistory")]
 public class MedicalHistoryController : ControllerBase
 {
     private readonly AppDb _db;
     public MedicalHistoryController(AppDb db) => _db = db;
 
+    // helper: Unspecified -> UTC date (bez vremena)
+    private static DateTime AsUtcDate(DateTime d)
+        => DateTime.SpecifyKind(d.Date, DateTimeKind.Utc);
+
+    // GET /api/patients/{patientId}/medicalhistory
     [HttpGet]
     public async Task<IActionResult> List(Guid patientId)
     {
@@ -28,42 +33,49 @@ public class MedicalHistoryController : ControllerBase
         return Ok(items);
     }
 
+    // POST /api/patients/{patientId}/medicalhistory
     [HttpPost]
     public async Task<IActionResult> Create(Guid patientId, [FromBody] MedicalHistoryDto dto)
     {
-        if (patientId != dto.PatientId) return BadRequest("Path i body patientId moraju se poklapati.");
-        if (!await _db.Patients.AnyAsync(p => p.Id == patientId)) return NotFound("Pacijent ne postoji.");
+        var p = await _db.Patients.FindAsync(patientId);
+        if (p is null) return NotFound("Pacijent ne postoji.");
 
-        var entity = new MedicalHistory
+        var mh = new MedicalHistory
         {
             PatientId = patientId,
-            DiseaseName = dto.DiseaseName,
-            StartDate = dto.StartDate,
-            EndDate = dto.EndDate
+            DiseaseName = dto.DiseaseName.Trim(),
+            StartDate = AsUtcDate(dto.StartDate),
+            EndDate = dto.EndDate.HasValue ? AsUtcDate(dto.EndDate.Value) : (DateTime?)null
         };
-        _db.MedicalHistory.Add(entity);
+
+        await _db.MedicalHistory.AddAsync(mh);
         await _db.SaveChangesAsync();
-        return CreatedAtAction(nameof(List), new { patientId }, new MedicalHistoryItemDto(entity.Id, entity.DiseaseName, entity.StartDate, entity.EndDate));
+
+        return Ok(new MedicalHistoryItemDto(mh.Id, mh.DiseaseName, mh.StartDate, mh.EndDate));
     }
 
+    // PUT /api/patients/{patientId}/medicalhistory/{id}
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid patientId, Guid id, [FromBody] MedicalHistoryDto dto)
     {
         var mh = await _db.MedicalHistory.FirstOrDefaultAsync(x => x.Id == id && x.PatientId == patientId);
         if (mh is null) return NotFound();
 
-        mh.DiseaseName = dto.DiseaseName;
-        mh.StartDate = dto.StartDate;
-        mh.EndDate = dto.EndDate;
+        mh.DiseaseName = dto.DiseaseName.Trim();
+        mh.StartDate = AsUtcDate(dto.StartDate);
+        mh.EndDate = dto.EndDate.HasValue ? AsUtcDate(dto.EndDate.Value) : null;
+
         await _db.SaveChangesAsync();
         return NoContent();
     }
 
+    // DELETE /api/patients/{patientId}/medicalhistory/{id}
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid patientId, Guid id)
     {
         var mh = await _db.MedicalHistory.FirstOrDefaultAsync(x => x.Id == id && x.PatientId == patientId);
         if (mh is null) return NotFound();
+
         _db.MedicalHistory.Remove(mh);
         await _db.SaveChangesAsync();
         return NoContent();

@@ -317,7 +317,7 @@
   {
     "ContainingType": "MedSys.Api.Controllers.MedicalHistoryController",
     "Method": "List",
-    "RelativePath": "api/patients/{patientId}/MedicalHistory",
+    "RelativePath": "api/patients/{patientId}/medicalhistory",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -333,7 +333,7 @@
   {
     "ContainingType": "MedSys.Api.Controllers.MedicalHistoryController",
     "Method": "Create",
-    "RelativePath": "api/patients/{patientId}/MedicalHistory",
+    "RelativePath": "api/patients/{patientId}/medicalhistory",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -354,7 +354,7 @@
   {
     "ContainingType": "MedSys.Api.Controllers.MedicalHistoryController",
     "Method": "Update",
-    "RelativePath": "api/patients/{patientId}/MedicalHistory/{id}",
+    "RelativePath": "api/patients/{patientId}/medicalhistory/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -380,7 +380,7 @@
   {
     "ContainingType": "MedSys.Api.Controllers.MedicalHistoryController",
     "Method": "Delete",
-    "RelativePath": "api/patients/{patientId}/MedicalHistory/{id}",
+    "RelativePath": "api/patients/{patientId}/medicalhistory/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
