@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedSys.Api", "MedSys.Api\MedSys.Api.csproj", "{7759B34F-D108-4F92-84D4-6045D034B3D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoWeb", "OncoWeb\OncoWeb.csproj", "{6D704B4D-5CB1-4F60-BEE8-F655720C35A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{7759B34F-D108-4F92-84D4-6045D034B3D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7759B34F-D108-4F92-84D4-6045D034B3D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7759B34F-D108-4F92-84D4-6045D034B3D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D704B4D-5CB1-4F60-BEE8-F655720C35A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D704B4D-5CB1-4F60-BEE8-F655720C35A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D704B4D-5CB1-4F60-BEE8-F655720C35A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D704B4D-5CB1-4F60-BEE8-F655720C35A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,6 @@
+@OncoWeb_HostAddress = http://localhost:5117
+
+GET {{OncoWeb_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
