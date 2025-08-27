@@ -1,65 +1,249 @@
-﻿body {
-    font-family: system-ui,Segoe UI,Roboto,Arial,sans-serif;
-    max-width: 1100px;
-    margin: 20px auto;
-    padding: 0 16px
+﻿:root {
+    --bg: #f6f9ff; 
+    --card: #ffffff;
+    --text: #0b1220; 
+    --muted: #6b7280; 
+    --border: #e5e7eb; 
+    --line: #eef2ff; 
+    --blue: #2563eb; 
+    --blue-700: #1d4ed8; 
+    --blue-50: #eff6ff; 
+    --shadow: 0 6px 24px rgba(37, 99, 235, .08), 0 2px 8px rgba(2, 6, 23, .06);
+    --radius: 14px;
 }
+
+html, body {
+    height: 100%
+}
+
+body {
+    font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, var(--bg), #fff 40%) fixed;
+    max-width: 1100px;
+    margin: 24px auto;
+    padding: 0 18px;
+}
+
+header.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+    header.nav h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700
+    }
+
+    header.nav nav {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap
+    }
+
+/* Cards */
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 14px;
+    margin: 12px 0;
+    box-shadow: var(--shadow);
+}
+
+    .card h2, .card h3 {
+        margin: 0 0 10px 0;
+        font-weight: 700;
+        color: var(--text);
+    }
 
 h1 {
     font-size: 22px
 }
 
 h2 {
-    font-size: 18px;
-    margin-top: 32px
+    font-size: 20px;
+    margin-top: 28px
 }
 
-input, select, button {
-    padding: 8px;
-    margin: 4px 0
+h3 {
+    font-size: 18px
 }
 
+.muted {
+    color: var(--muted)
+}
+
+ul.plain {
+    list-style: none;
+    padding-left: 0;
+    margin: 8px 0
+}
+
+    ul.plain li {
+        margin: 6px 0
+    }
+
+/* ====== Forms ============================================================ */
 .row {
     display: flex;
     gap: 16px;
     flex-wrap: wrap
 }
 
-.card {
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    padding: 12px;
-    margin: 8px 0
+label {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 6px
 }
 
-table {
-    border-collapse: collapse;
-    width: 100%
+input, select, textarea, button {
+    font: inherit;
 }
 
-th, td {
-    border-bottom: 1px solid #eee;
-    padding: 6px;
-    text-align: left
+input, select, textarea {
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    min-height: 38px;
+    transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
 }
 
-small {
-    color: #666
-}
+    input::placeholder, textarea::placeholder {
+        color: #9aa1ad
+    }
 
-a.btn {
-    display: inline-block;
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    text-decoration: none
-}
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    }
 
-.form-inline {
+/* Buttons */
+.btn, button.btn, a.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     gap: 8px;
+    padding: 8px 12px;
+    min-height: 38px;
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    background: #fff;
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s ease, color .15s ease, border-color .15s ease, transform .03s ease;
+}
+
+    .btn:hover {
+        background: var(--blue-50)
+    }
+
+    .btn:active {
+        transform: translateY(1px)
+    }
+
+    .btn.ghost {
+        border-color: transparent;
+        color: var(--blue);
+        background: transparent;
+    }
+
+        .btn.ghost:hover {
+            background: var(--blue-50)
+        }
+
+    .btn.primary {
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+    }
+
+        .btn.primary:hover {
+            background: var(--blue-700);
+            border-color: var(--blue-700)
+        }
+
+    .btn[disabled], .btn:disabled {
+        opacity: .55;
+        cursor: not-allowed
+    }
+
+/* Inline form helpers used u HTML-u */
+.form-inline {
+    gap: 10px;
     align-items: end;
-    justify-content: flex-start; 
+    justify-content: flex-start;
     flex-wrap: wrap;
     margin: 6px 0 10px;
 }
 
+/* File input (subtle polish) */
+input[type="file"] {
+    padding: 7px 10px;
+    background: #fff;
+}
+
+/* ====== Tables =========================================================== */
+.table {
+    width: 100%;
+    border-collapse: collapse
+}
+
+    .table thead th {
+        font-size: 12px;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+        color: var(--muted);
+        background: var(--blue-50);
+        border-bottom: 1px solid var(--line);
+        padding: 10px;
+    }
+
+    .table tbody td {
+        border-bottom: 1px solid var(--line);
+        padding: 10px;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background: #fafcff
+    }
+
+    .table tbody tr:hover {
+        background: #f2f7ff
+    }
+
+    /* Links inside tables/lists */
+    .table a {
+        color: var(--blue);
+        text-decoration: none
+    }
+
+        .table a:hover {
+            text-decoration: underline
+        }
+
+/* Small helper spacing */
+small {
+    color: var(--muted)
+}
+
+/* Back button spacing consistency */
+a.btn.ghost {
+    padding-left: 10px;
+    padding-right: 10px
+}
+
+/* Make long tables & forms breathe a bit */
+main.stack > .card + .card {
+    margin-top: 16px
+}

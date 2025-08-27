@@ -1,0 +1,5 @@
+Section,PatientId,FirstName,LastName,OIB,BirthDate,Sex,PatientNumber,HistoryId,DiseaseName,StartDate,EndDate,VisitId,VisitDateTime,VisitType,Notes,DoctorId,DoctorName,DocumentCount
+Patient,3af8b947-2503-4ef6-8eca-d15f8e0fd5c4,"Ivan","Babić","25595383631",2001-01-20,"M","P-0003",,,,,,,,,,,
+MedicalHistory,3af8b947-2503-4ef6-8eca-d15f8e0fd5c4,"Ivan","Babić","25595383631",2001-01-20,"M","P-0003",6d5c0092-6228-4efb-b51f-0bbf24b5bfa3,"Prehlada",2025-08-27,2025-08-28,,,,,,,
+Visit,3af8b947-2503-4ef6-8eca-d15f8e0fd5c4,"Ivan","Babić","25595383631",2001-01-20,"M","P-0003",,,,,87fb328f-08b0-43b4-ba21-ca44fe31ab2e,2025-08-28 12:52:00,"X-RAY","Hitan pregled",,,0
+Visit,3af8b947-2503-4ef6-8eca-d15f8e0fd5c4,"Ivan","Babić","25595383631",2001-01-20,"M","P-0003",,,,,81417d4c-b071-469a-82ba-b1ab3e8fc061,2025-08-29 11:08:00,"EKG","Hitan pregled",,,0
