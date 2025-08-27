@@ -1,6 +1,6 @@
 wwwroot\index.html
 wwwroot\js\api.js
-wwwroot\visit-new.html
-wwwroot\css\Site.css
 wwwroot\js\patient.js
 wwwroot\patient.html
+wwwroot\visit-new.html
+wwwroot\css\Site.css

@@ -206,11 +206,14 @@ input[type="file"] {
         background: var(--blue-50);
         border-bottom: 1px solid var(--line);
         padding: 10px;
+        text-align: left;
+        vertical-align: bottom; 
     }
 
     .table tbody td {
         border-bottom: 1px solid var(--line);
         padding: 10px;
+        text-align: left;
     }
 
     .table tbody tr:nth-child(even) {

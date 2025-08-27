@@ -49,6 +49,8 @@ builder.Services.AddCors(p => p.AddDefaultPolicy(pb => pb.AllowAnyOrigin().Allow
 
 var app = builder.Build();
 
+
+
 app.Use(async (ctx, next) =>
 {
     try { await next(); }
@@ -72,12 +74,18 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
+app.UseDefaultFiles(new DefaultFilesOptions
+{
+    DefaultFileNames = new List<string> { "index.html" }
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MedSys.Api v1"));
 }
-app.UseDefaultFiles();  
+
+
 app.UseStaticFiles();
 app.UseCors();
 app.UseHttpsRedirection();
