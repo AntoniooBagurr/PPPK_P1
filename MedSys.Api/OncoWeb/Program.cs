@@ -3,12 +3,17 @@ using Amazon.Runtime;
 using Amazon.S3;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using OncoWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Options
 builder.Services.Configure<AppOptions>(builder.Configuration.GetSection("App"));
 var appOptions = builder.Configuration.GetSection("App").Get<AppOptions>() ?? new AppOptions();
+
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<IStorageService, StorageService>();
+builder.Services.AddSingleton<IngestService>();
 
 // Mongo
 builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(appOptions.Mongo.ConnectionString));
@@ -29,7 +34,7 @@ builder.Services.AddSingleton<IAmazonS3>(_ =>
     var cfg = new AmazonS3Config
     {
         ServiceURL = appOptions.Minio.Endpoint,
-        ForcePathStyle = true,    // VAŽNO za MinIO
+        ForcePathStyle = true,   
         UseHttp = appOptions.Minio.Endpoint.StartsWith("http://"),
         AuthenticationRegion = "us-east-1"
     };

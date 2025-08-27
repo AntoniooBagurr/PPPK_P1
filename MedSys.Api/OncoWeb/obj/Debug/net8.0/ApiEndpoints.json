@@ -1,0 +1,65 @@
+[
+  {
+    "ContainingType": "OncoWeb.Controllers.AdminController",
+    "Method": "Ingest",
+    "RelativePath": "api/admin/ingest",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "req",
+        "Type": "OncoWeb.Models.IngestRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "GenesController",
+    "Method": "GetOne",
+    "RelativePath": "api/genes/{cohort}/{patientId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "cohort",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "patientId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "GeneExpressionDoc",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "GenesController",
+    "Method": "Query",
+    "RelativePath": "api/genes/query",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "q",
+        "Type": "GeneQuery",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
