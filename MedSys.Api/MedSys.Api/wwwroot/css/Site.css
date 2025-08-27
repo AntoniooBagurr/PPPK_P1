@@ -45,7 +45,7 @@ header.nav {
         flex-wrap: wrap
     }
 
-/* Cards */
+
 .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -88,7 +88,7 @@ ul.plain {
         margin: 6px 0
     }
 
-/* ====== Forms ============================================================ */
+
 .row {
     display: flex;
     gap: 16px;
@@ -178,7 +178,7 @@ input, select, textarea {
         cursor: not-allowed
     }
 
-/* Inline form helpers used u HTML-u */
+
 .form-inline {
     gap: 10px;
     align-items: end;
@@ -187,13 +187,12 @@ input, select, textarea {
     margin: 6px 0 10px;
 }
 
-/* File input (subtle polish) */
 input[type="file"] {
     padding: 7px 10px;
     background: #fff;
 }
 
-/* ====== Tables =========================================================== */
+
 .table {
     width: 100%;
     border-collapse: collapse
@@ -222,7 +221,7 @@ input[type="file"] {
         background: #f2f7ff
     }
 
-    /* Links inside tables/lists */
+ 
     .table a {
         color: var(--blue);
         text-decoration: none
@@ -232,18 +231,67 @@ input[type="file"] {
             text-decoration: underline
         }
 
-/* Small helper spacing */
+
 small {
     color: var(--muted)
 }
 
-/* Back button spacing consistency */
+
 a.btn.ghost {
     padding-left: 10px;
     padding-right: 10px
 }
 
-/* Make long tables & forms breathe a bit */
+
 main.stack > .card + .card {
     margin-top: 16px
 }
+.typeahead {
+    position: relative;
+    min-width: 220px
+}
+
+.suggest {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    display: none;
+    margin-top: 6px;
+}
+
+    .suggest.open {
+        display: block
+    }
+
+    .suggest ul {
+        list-style: none;
+        margin: 0;
+        padding: 6px;
+        max-height: 240px;
+        overflow: auto
+    }
+
+    .suggest li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 10px;
+        cursor: pointer;
+        border-radius: 8px;
+    }
+
+        .suggest li:hover, .suggest li.active {
+            background: var(--blue-50)
+        }
+
+    .suggest .atc {
+        font-size: 12px;
+        color: var(--muted)
+    }

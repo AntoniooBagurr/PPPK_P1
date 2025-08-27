@@ -4,10 +4,9 @@
     <meta charset="utf-8" />
     <title>MedSys – Pacijent</title>
     <link rel="stylesheet" href="/css/site.css">
-    <!-- api helpers -->
-    <script src="/js/api.js?v=9" defer></script>
 
-    <script src="js/patient.js" defer></script>
+    <script src="/js/api.js?v=10" defer></script>
+    <script src="/js/patient.js?v=10" defer></script>
 </head>
 <body>
     <header class="nav">
@@ -93,10 +92,11 @@
                     Pregled<br>
                     <select id="rx_visit" required></select>
                 </label>
-                <label>
+                <label class="typeahead">
                     Lijek<br>
-                    <input id="rx_med" list="rx_meds" placeholder="npr. Amoksicilin" autocomplete="off" required>
-                    <datalist id="rx_meds"></datalist>
+                    <input id="rx_med" placeholder="npr. Amoksicilin" autocomplete="off" required>
+                    <input type="hidden" id="rx_medId">
+                    <div id="rx_suggest" class="suggest"><ul></ul></div>
                 </label>
                 <label>Doza<br><input id="rx_dosage" placeholder="npr. 500 mg" required></label>
                 <label>Učestalost<br><input id="rx_freq" placeholder="npr. 2×/dan" required></label>

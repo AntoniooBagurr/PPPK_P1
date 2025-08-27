@@ -53,25 +53,24 @@
             });
             fillTable('#tblVisits', vRows);
 
-            // Napuni <select> za recept i upload dokumenta (sort: najnovije prvo)
             const optionsHtml = visitsCache
                 .slice()
                 .sort((a, b) => new Date(b.visitDateTime) - new Date(a.visitDateTime))
                 .map(v => `<option value="${v.id}">${esc(v.visitType)} — ${fmtDateTime(v.visitDateTime)}</option>`)
                 .join('');
-            qsel('#rx_visit').innerHTML = optionsHtml;
-            qsel('#doc_visit').innerHTML = optionsHtml;
+            const selRx = qsel('#rx_visit');
+            const selDoc = qsel('#doc_visit');
+            if (selRx) selRx.innerHTML = optionsHtml;
+            if (selDoc) selDoc.innerHTML = optionsHtml;
 
-            // Onemogući forme ako nema pregleda
             const hasVisits = visitsCache.length > 0;
             const btnRx = qsel('#frmRx button[type="submit"]') || qsel('#frmRx button');
             const btnDoc = qsel('#frmDocVisit button[type="submit"]') || qsel('#frmDocVisit button');
             if (btnRx) btnRx.disabled = !hasVisits;
             if (btnDoc) btnDoc.disabled = !hasVisits;
-            qsel('#rx_visit').disabled = !hasVisits;
-            qsel('#doc_visit').disabled = !hasVisits;
+            if (selRx) selRx.disabled = !hasVisits;
+            if (selDoc) selDoc.disabled = !hasVisits;
 
-            // Dokumenti pacijenta (odvojeno)
             await loadPatientDocs();
         } catch (err) {
             toast(err?.message || 'Greška pri dohvaćanju podataka.');
@@ -87,7 +86,7 @@
         ).join('');
     }
 
-    // Povijest bolesti – submit
+    // ======= Povijest bolesti – submit ================
     qsel('#frmMh').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
@@ -103,7 +102,7 @@
         } catch (err) { toast(err?.message || 'Greška pri spremanju.'); }
     });
 
-    // Novi pregled – submit
+    // ======= Novi pregled – submit =============
     qsel('#frmVisitNew').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
@@ -123,32 +122,104 @@
         } catch (err) { toast(err?.message || 'Greška pri dodavanju pregleda.'); }
     });
 
-    // Recept – autocomplete lijekova
-    qsel('#rx_med').addEventListener('input', async (e) => {
-        const q = e.target.value.trim();
-        if (q.length < 2) return;
+
+    let rxSelectedMed = null;  
+    let rxDebTimer = null;
+
+    const $rxMed = () => qsel('#rx_med');
+    const $rxMedId = () => qsel('#rx_medId');
+    const $rxSug = () => qsel('#rx_suggest');
+    const $rxSugList = () => qsel('#rx_suggest ul');
+
+    function openSuggest() { $rxSug().classList.add('open'); }
+    function closeSuggest() { $rxSug().classList.remove('open'); }
+    function clearSelection() {
+        rxSelectedMed = null;
+        $rxMedId().value = '';
+    }
+    function pickMed(m) {
+        rxSelectedMed = m;
+        $rxMed().value = m.name;
+        $rxMedId().value = m.id;
+        closeSuggest();
+    }
+
+    async function fetchMeds(q) {
+        const url = q && q.length >= 1 ? `/api/medications?q=${encodeURIComponent(q)}` : `/api/medications`;
         try {
-            medsCache = await apiGet('/api/medications?q=' + encodeURIComponent(q));
-            qsel('#rx_meds').innerHTML = medsCache
-                .map(m => `<option value="${esc(m.name)}"></option>`).join('');
-        } catch { /* ignoriši */ }
+            medsCache = await apiGet(url);
+        } catch {
+            medsCache = [];
+        }
+        renderSuggest();
+    }
+
+    function renderSuggest() {
+        const ul = $rxSugList();
+        ul.innerHTML = medsCache.map((m, i) => `
+          <li data-i="${i}">
+            <span>${esc(m.name)}</span>
+            ${m.atcCode ? `<span class="atc">${esc(m.atcCode)}</span>` : ''}
+          </li>
+        `).join('');
+        openSuggest();
+
+        ul.querySelectorAll('li').forEach(li => {
+            li.addEventListener('click', () => {
+                const i = Number(li.dataset.i);
+                if (!isNaN(i) && medsCache[i]) pickMed(medsCache[i]);
+            });
+        });
+    }
+
+
+    $rxMed().addEventListener('input', (e) => {
+        clearSelection();
+        const q = e.target.value.trim();
+        window.clearTimeout(rxDebTimer);
+        rxDebTimer = window.setTimeout(() => fetchMeds(q), 180);
+    });
+    $rxMed().addEventListener('focus', () => {
+        if (!medsCache.length) fetchMeds($rxMed().value.trim());
+        else renderSuggest();
+    });
+    $rxMed().addEventListener('blur', () => setTimeout(() => closeSuggest(), 150));
+
+  
+    $rxMed().addEventListener('keydown', (e) => {
+        const items = Array.from($rxSugList().querySelectorAll('li'));
+        if (!items.length) return;
+
+        const cur = items.findIndex(li => li.classList.contains('active'));
+        const setActive = (idx) => {
+            items.forEach(li => li.classList.remove('active'));
+            if (idx >= 0 && idx < items.length) items[idx].classList.add('active');
+        };
+
+        if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(cur + 1, items.length - 1)); openSuggest(); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(cur - 1, 0)); openSuggest(); }
+        if (e.key === 'Enter') {
+            if (cur >= 0) { e.preventDefault(); items[cur].click(); }
+        }
+        if (e.key === 'Escape') { closeSuggest(); }
     });
 
-    // Recept – submit
+    // ======= Recept – submit ===================
     qsel('#frmRx').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
             const visitId = qsel('#rx_visit').value;
             if (!visitId) return toast('Odaberi pregled.');
-            const medName = qsel('#rx_med').value.trim();
-            if (!medName) return toast('Upiši lijek.');
+
+            const medId = $rxMedId().value;
+            if (!medId) return toast('Odaberi lijek s popisa.');
 
             const body = {
                 visitId,
                 notes: qsel('#rx_notes').value || null,
                 items: [{
-                    medicationId: null,                 // upsert by name
-                    medicationName: medName,
+                    medicationId: medId,            
+                    medicationName: null,            
                     dosage: qsel('#rx_dosage').value.trim(),
                     frequency: qsel('#rx_freq').value.trim(),
                     durationDays: Number(qsel('#rx_days').value || 0)
@@ -156,11 +227,12 @@
             };
             await apiPostJson('/api/prescriptions', body);
             e.target.reset();
+            clearSelection();
             await load();
         } catch (err) { toast(err?.message || 'Greška pri spremanju recepta.'); }
     });
 
-    // Upload dokumenta na PREGLED
+    // ======= Upload dokumenta na PREGLED ===================================================
     qsel('#frmDocVisit').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
@@ -171,13 +243,13 @@
             const fd = new FormData(); fd.append('file', f);
             await apiPostForm(`/api/visits/${visitId}/documents`, fd);
             qsel('#doc_file').value = '';
-            await load(); // prikaži nove dokumente u tablici pregleda
+            await load();
         } catch (err) {
             toast(err?.message || 'Greška pri uploadu dokumenta.');
         }
     });
 
-    // Upload dokumenta PACIJENTA
+    // ======= Upload dokumenta PACIJENTA ====================================================
     qsel('#btnUploadPatientDoc').addEventListener('click', async (e) => {
         e.preventDefault();
         const f = qsel('#pf_file').files[0];
