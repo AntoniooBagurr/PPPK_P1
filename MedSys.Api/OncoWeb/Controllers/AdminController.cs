@@ -47,9 +47,14 @@ public class AdminController : ControllerBase
         await _storage.EnsureBucketAsync(bucket, ct);
 
         var objectName = $"{form.Cohort.ToLowerInvariant()}/{Path.GetFileName(form.File.FileName)}";
+       
         await using var s = form.File.OpenReadStream();
-        await _storage.PutObjectAsync(bucket, objectName, s,
-            form.File.ContentType ?? "application/octet-stream", ct);
+        await _storage.PutObjectAsync(
+            bucket,
+            objectName,
+            s,
+            form.File.ContentType ?? "application/octet-stream",
+            ct);
 
         return Ok(new { saved = objectName, bytes = form.File.Length });
     }

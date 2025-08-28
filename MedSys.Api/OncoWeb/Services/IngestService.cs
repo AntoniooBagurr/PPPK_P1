@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Headers;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
+using System.Net.Http.Headers;
 using OncoWeb.Models;
 
 namespace OncoWeb.Services;
@@ -7,25 +9,42 @@ public class IngestService
 {
     private readonly IHttpClientFactory _http;
     private readonly IStorageService _storage;
-    private readonly Microsoft.Extensions.Options.IOptions<AppOptions> _opts;
+    private readonly AppOptions _opts;
 
-    public IngestService(IHttpClientFactory http, IStorageService storage, Microsoft.Extensions.Options.IOptions<AppOptions> opts)
+    public IngestService(IHttpClientFactory http, IStorageService storage, IOptions<AppOptions> opts)
     {
         _http = http;
         _storage = storage;
-        _opts = opts;
+        _opts = opts.Value;
     }
 
-    private static bool LooksLikeUrl(string s) => s.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-                                                 s.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
-
-    // pomoć: generiraj moguće mirror URL-ove ako je stiglo samo ime datoteke
-    private static IEnumerable<string> BuildCandidates(string fileName)
+    private static IEnumerable<string> BuildCandidatesFromUrlOrName(string input)
     {
-        // redoslijed probavanja (neki znaju vraćati 403/404 – zato fallback)
-        yield return $"https://tcga.xenahubs.net/download?filename={Uri.EscapeDataString(fileName)}";
-        yield return $"https://gdc-hub.s3.us-east-1.amazonaws.com/download/{fileName}";
-        yield return $"https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/{fileName}";
+        string? file = null;
+
+        if (Uri.TryCreate(input, UriKind.Absolute, out var uri))
+        {
+            yield return input;
+
+            var local = Path.GetFileName(uri.LocalPath);
+            if (string.Equals(local, "download", StringComparison.OrdinalIgnoreCase))
+            {
+                var q = QueryHelpers.ParseQuery(uri.Query);
+                if (q.TryGetValue("filename", out var fn) && !string.IsNullOrWhiteSpace(fn))
+                    file = fn.ToString();
+            }
+            else file = local;
+        }
+        else file = input;
+
+        if (!string.IsNullOrWhiteSpace(file))
+        {
+            var enc = Uri.EscapeDataString(file);
+            yield return $"https://tcga.xenahubs.net/download?filename={enc}";
+            yield return $"https://pancanatlas.xenahubs.net/download/{enc}";
+            yield return $"https://pancanatlas.xenahubs.net/download?filename={enc}";
+            yield return $"https://toil-xenahub.s3.us-east-1.amazonaws.com/download/{file}";
+        }
     }
 
     public async Task<IngestResult> RunAsync(IngestRequest req, CancellationToken ct)
@@ -33,11 +52,10 @@ public class IngestService
         var result = new IngestResult();
         if (req?.Jobs == null || req.Jobs.Count == 0) return result;
 
-        var bucket = _opts.Value.Minio.Bucket;
+        var bucket = _opts.Minio.Bucket;
         await _storage.EnsureBucketAsync(bucket, ct);
 
-        var client = _http.CreateClient();
-        // jednostavan UA (bez “comment” dijela – izbjegava FormatException)
+        var client = _http.CreateClient("xena");
         client.DefaultRequestHeaders.UserAgent.Clear();
         client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("OncoWeb", "1.0"));
 
@@ -49,20 +67,12 @@ public class IngestService
                 continue;
             }
 
-            var urlCandidates = new List<string>();
-            if (LooksLikeUrl(job.Url))
-            {
-                urlCandidates.Add(job.Url.Trim());
-            }
-            else
-            {
-                urlCandidates.AddRange(BuildCandidates(job.Url.Trim()));
-            }
+            var candidates = BuildCandidatesFromUrlOrName(job.Url.Trim()).ToList();
 
             HttpResponseMessage? okResp = null;
             string? okUrl = null;
 
-            foreach (var u in urlCandidates)
+            foreach (var u in candidates)
             {
                 try
                 {
@@ -75,7 +85,10 @@ public class IngestService
                     }
                     resp.Dispose();
                 }
-                catch { /* ignoriraj i probaj sljedeći mirror */ }
+                catch
+                {
+                    // probaj sljedeći mirror
+                }
             }
 
             if (okResp == null)
@@ -86,17 +99,25 @@ public class IngestService
 
             using (okResp)
             {
-                var ctType = okResp.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
-                var fileName = Path.GetFileName(okResp.RequestMessage!.RequestUri!.LocalPath);
-                if (string.IsNullOrWhiteSpace(fileName) || !fileName.Contains('.'))
-                    fileName = Path.GetFileName(job.Url); // fallback
+                var contentType = okResp.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
+
+                var reqUri = okResp.RequestMessage!.RequestUri!;
+                var fileName = Path.GetFileName(reqUri.LocalPath);
+                if (string.IsNullOrWhiteSpace(fileName) || fileName.Equals("download", StringComparison.OrdinalIgnoreCase))
+                {
+                    var q = QueryHelpers.ParseQuery(reqUri.Query);
+                    if (q.TryGetValue("filename", out var fn) && !string.IsNullOrWhiteSpace(fn))
+                        fileName = fn.ToString();
+                }
+                if (string.IsNullOrWhiteSpace(fileName))
+                    fileName = Path.GetFileName(job.Url);
 
                 var objectName = string.IsNullOrWhiteSpace(job.ObjectName)
                     ? $"{job.Cohort.ToLowerInvariant()}/{fileName}"
                     : job.Cohort.ToLowerInvariant() + "/" + job.ObjectName.TrimStart('/');
 
-                await using var s = await okResp.Content.ReadAsStreamAsync(ct);
-                await _storage.PutObjectAsync(bucket, objectName, s, ctType, ct);
+                await using var stream = await okResp.Content.ReadAsStreamAsync(ct);
+                await _storage.PutObjectAsync(bucket, objectName, stream, contentType, ct);
 
                 result.Downloaded.Add(new IngestItemResult
                 {

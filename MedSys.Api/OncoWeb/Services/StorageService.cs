@@ -35,6 +35,32 @@ public class StorageService : IStorageService
         await _s3.PutObjectAsync(req, ct);
     }
 
+
+    public async Task PutObjectAsync(
+     string bucket,
+     string objectName,
+     Stream data,
+     string contentType,
+     long? size = null,
+     CancellationToken ct = default)
+    {
+        if (data.CanSeek && (!size.HasValue || size <= 0))
+            size = data.Length;
+
+        var req = new PutObjectRequest
+        {
+            BucketName = bucket,
+            Key = objectName,
+            InputStream = data,
+            ContentType = string.IsNullOrWhiteSpace(contentType) ? "application/octet-stream" : contentType
+        };
+
+        if (size.HasValue)           
+            req.Headers.ContentLength = size.Value;
+
+        await _s3.PutObjectAsync(req, ct);
+    }
+
     public Task PutObjectAsync(string bucket, string objectName, Stream data, string contentType, CancellationToken ct = default)
     {
         throw new NotImplementedException();
