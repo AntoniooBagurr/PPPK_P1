@@ -1,0 +1,13 @@
+Pacijent,OIB,Datum rođenja,Spol,Broj pacijenta
+"Petar Perić","24332879460",2003-12-01,"M","P-0005"
+
+Povijest bolesti
+Naziv,Početak,Kraj
+
+Pregledi
+Datum/vrijeme,Tip,Liječnik,Bilješka,Dokumenti
+2025-08-29 14:12,"X-RAY","","Hitan pregled",""
+
+Dokumenti pacijenta
+Naziv,Veličina (B),Uploadano
+"patients (3).csv",556,2025-08-26 12:48

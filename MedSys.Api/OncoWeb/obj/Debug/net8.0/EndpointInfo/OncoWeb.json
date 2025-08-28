@@ -36,6 +36,37 @@
         }
       }
     },
+    "/api/admin/ingest/single": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestJob"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestJob"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestJob"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/genes/{cohort}/{patientId}": {
       "get": {
         "tags": [
@@ -170,17 +201,31 @@
         },
         "additionalProperties": false
       },
-      "IngestRequest": {
+      "IngestJob": {
         "type": "object",
         "properties": {
           "cohort": {
             "type": "string",
             "nullable": true
           },
-          "tsvUrls": {
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "objectName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "IngestRequest": {
+        "type": "object",
+        "properties": {
+          "jobs": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/IngestJob"
             },
             "nullable": true
           }

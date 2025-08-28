@@ -1,30 +1,37 @@
-﻿using System.Text.RegularExpressions;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.S3.Util;
 
 namespace OncoWeb.Services;
 
 public class StorageService : IStorageService
 {
-    private readonly string _root;
+    private readonly IAmazonS3 _s3;
 
-    public StorageService(IWebHostEnvironment env)
-    {
-        _root = Path.Combine(env.ContentRootPath, "storage"); 
-        Directory.CreateDirectory(_root);
-    }
+    public StorageService(IAmazonS3 s3) => _s3 = s3;
 
-    public Task EnsureBucketAsync(string bucket, CancellationToken ct = default)
+    public async Task EnsureBucketAsync(string bucket, CancellationToken ct = default)
     {
-        Directory.CreateDirectory(Path.Combine(_root, San(bucket)));
-        return Task.CompletedTask;
+        var exists = await AmazonS3Util.DoesS3BucketExistV2Async(_s3, bucket);
+        if (!exists)
+        {
+            var put = new PutBucketRequest { BucketName = bucket, UseClientRegion = true };
+            await _s3.PutBucketAsync(put, ct);
+        }
     }
 
     public async Task PutAsync(string bucket, string key, Stream data, long length, string contentType, CancellationToken ct = default)
     {
-        var full = Path.Combine(_root, San(bucket), key.Replace('/', Path.DirectorySeparatorChar));
-        Directory.CreateDirectory(Path.GetDirectoryName(full)!);
-        using var fs = File.Create(full);
-        await data.CopyToAsync(fs, ct);
-    }
+        if (data.CanSeek) data.Position = 0;
 
-    private static string San(string v) => Regex.Replace(v, @"[^a-zA-Z0-9_\-\.]", "_");
+        var req = new PutObjectRequest
+        {
+            BucketName = bucket,
+            Key = key,
+            InputStream = data,
+            AutoCloseStream = false,
+            ContentType = string.IsNullOrWhiteSpace(contentType) ? "application/octet-stream" : contentType
+        };
+        await _s3.PutObjectAsync(req, ct);
+    }
 }

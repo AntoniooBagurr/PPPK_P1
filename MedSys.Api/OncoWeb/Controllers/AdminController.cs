@@ -15,22 +15,33 @@ public class AdminController : ControllerBase
     [HttpPost("ingest")]
     public async Task<IActionResult> Ingest([FromBody] IngestRequest req, CancellationToken ct)
     {
-        if (req == null || string.IsNullOrWhiteSpace(req.Cohort))
-            return BadRequest("cohort je obavezan.");
-
-        if (req.TsvUrls == null || req.TsvUrls.Count == 0) // Count PROPERTY na List<string>
-            return BadRequest("tsvUrls mora sadržavati barem jedan URL.");
-
-        // eksplicitna validacija da izbjegnemo 500 i UriFormatException
-        for (int i = 0; i < req.TsvUrls.Count; i++)
-        {
-            var raw = (req.TsvUrls[i] ?? string.Empty).Trim();
-            if (!Uri.TryCreate(raw, UriKind.Absolute, out var uri) ||
-                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-                return BadRequest($"Neispravan URL na indeksu {i}: '{raw}'. Očekujem apsolutni http(s) URL.");
-        }
+        if (req?.Jobs == null || req.Jobs.Count == 0)
+            return BadRequest("jobs je obavezan.");
 
         var result = await _svc.RunAsync(req, ct);
         return Ok(result);
     }
+
+    // POST /api/admin/ingest/single
+    [HttpPost("ingest/single")]
+    public async Task<IActionResult> IngestSingle([FromBody] IngestJob job, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(job?.Cohort) || string.IsNullOrWhiteSpace(job.Url))
+            return BadRequest("cohort i url su obavezni.");
+
+        var result = await _svc.RunAsync(new IngestRequest { Jobs = new() { job } }, ct);
+        return Ok(result);
+    }
+
+    [HttpPost("ingest/local")]
+    public async Task<IActionResult> IngestLocal([FromForm] string cohort, [FromForm] IFormFile file, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(cohort)) return BadRequest("cohort je obavezan.");
+        if (file == null || file.Length == 0) return BadRequest("file je obavezan.");
+
+        var objectName = $"{cohort.ToLowerInvariant()}/{Path.GetFileName(file.FileName)}";
+        await _svc.UploadLocalAsync(objectName, file.ContentType ?? "application/octet-stream", file.OpenReadStream(), file.Length, ct);
+        return Ok(new { uploaded = objectName, bytes = file.Length });
+    }
+
 }

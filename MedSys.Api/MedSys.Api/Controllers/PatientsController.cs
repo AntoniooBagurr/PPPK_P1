@@ -20,32 +20,37 @@ public class PatientsController : ControllerBase
         _db = db;
         _factory = factory;
     }
- 
+
     private static DateTime AsUtcDate(DateTime d)
     {
-     
         if (d.Kind == DateTimeKind.Unspecified)
             return DateTime.SpecifyKind(d.Date, DateTimeKind.Utc);
-
         return d.ToUniversalTime().Date;
     }
 
-   
-
     // GET /api/patients?lastName=&oib=
     [HttpGet]
-    public async Task<ActionResult<List<PatientSummaryDto>>> Search([FromQuery] string? lastName, [FromQuery] string? oib)
+    public async Task<ActionResult<List<PatientSummaryDto>>> Search(
+        [FromQuery] string? lastName, [FromQuery] string? oib)
     {
         var q = _db.Patients.AsNoTracking().AsQueryable();
+
         if (!string.IsNullOrWhiteSpace(lastName))
+        {
+            // PostgreSQL (ILIKE):
             q = q.Where(p => EF.Functions.ILike(p.LastName, lastName + "%"));
+            // Ako nisi na PostgreSQL-u, zamijeni s:
+            // q = q.Where(p => p.LastName.ToLower().StartsWith(lastName.ToLower()));
+        }
+
         if (!string.IsNullOrWhiteSpace(oib))
             q = q.Where(p => p.OIB == oib);
 
-        var list = await q.Take(100)
+        var list = await q
+            .OrderBy(p => p.LastName).ThenBy(p => p.FirstName)
+            .Take(100)
             .Select(p => new PatientSummaryDto(
-                p.Id, p.FirstName, p.LastName, p.OIB, p.BirthDate, p.Sex, p.PatientNumber
-            ))
+                p.Id, p.FirstName, p.LastName, p.OIB, p.BirthDate, p.Sex, p.PatientNumber))
             .ToListAsync();
 
         return Ok(list);
@@ -55,7 +60,13 @@ public class PatientsController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<PatientDetailsDto>> Get(Guid id)
     {
-        var p = await _db.Patients.FindAsync(id);
+        var p = await _db.Patients
+            .Include(x => x.MedicalHistory)
+            .Include(x => x.Visits).ThenInclude(v => v.Doctor)
+            .Include(x => x.Visits).ThenInclude(v => v.Documents)
+            .Include(x => x.Visits).ThenInclude(v => v.Prescriptions).ThenInclude(pr => pr.Items).ThenInclude(i => i.Medication)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
         if (p == null) return NotFound();
 
         var patient = new PatientSummaryDto(p.Id, p.FirstName, p.LastName, p.OIB, p.BirthDate, p.Sex, p.PatientNumber);
@@ -85,8 +96,8 @@ public class PatientsController : ControllerBase
                           .ToList()
                     ))
                     .ToList(),
-                v.DoctorId,                             
-                v.Doctor != null ? v.Doctor.FullName : null 
+                v.DoctorId,
+                v.Doctor != null ? v.Doctor.FullName : null
             ))
             .ToList();
 
@@ -102,7 +113,7 @@ public class PatientsController : ControllerBase
             FirstName = dto.FirstName.Trim(),
             LastName = dto.LastName.Trim(),
             OIB = dto.OIB.Trim(),
-            BirthDate = AsUtcDate(dto.BirthDate), 
+            BirthDate = AsUtcDate(dto.BirthDate),
             Sex = dto.Sex,
             PatientNumber = dto.PatientNumber
         };
@@ -127,7 +138,7 @@ public class PatientsController : ControllerBase
         p.FirstName = dto.FirstName.Trim();
         p.LastName = dto.LastName.Trim();
         p.OIB = dto.OIB.Trim();
-        p.BirthDate = AsUtcDate(dto.BirthDate); 
+        p.BirthDate = AsUtcDate(dto.BirthDate);
         p.Sex = dto.Sex;
         p.PatientNumber = dto.PatientNumber;
 
@@ -146,7 +157,35 @@ public class PatientsController : ControllerBase
         return NoContent();
     }
 
-    // GET /api/patients/export.csv
+    // GET /api/patients/export.csv  (izvoz LISTE – prati iste filtere kao tražilica)
+    [HttpGet("export.csv")]
+    public async Task<IActionResult> ExportListCsv([FromQuery] string? lastName, [FromQuery] string? oib)
+    {
+        var q = _db.Patients.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(lastName))
+            q = q.Where(p => EF.Functions.ILike(p.LastName, lastName + "%"));
+        if (!string.IsNullOrWhiteSpace(oib))
+            q = q.Where(p => p.OIB == oib);
+
+        var rows = await q
+            .OrderBy(p => p.LastName).ThenBy(p => p.FirstName)
+            .Select(p => new { p.FirstName, p.LastName, p.OIB, p.BirthDate, p.Sex, p.PatientNumber })
+            .ToListAsync();
+
+        var sb = new StringBuilder();
+        sb.AppendLine("firstName,lastName,oib,birthDate,sex,patientNumber");
+        foreach (var r in rows)
+            sb.AppendLine(string.Join(",",
+                Csv(r.FirstName), Csv(r.LastName), Csv(r.OIB),
+                r.BirthDate.ToString("yyyy-MM-dd"),
+                Csv(r.Sex), Csv(r.PatientNumber)));
+
+        var bytes = Utf8Bom(sb.ToString());
+        return File(bytes, "text/csv; charset=utf-8", "patients.csv");
+    }
+
+    // GET /api/patients/{id}/export.csv  (izvoz JEDNOG pacijenta)
     [HttpGet("{id:guid}/export.csv")]
     public async Task<IActionResult> ExportPatientCsv(Guid id)
     {
@@ -162,7 +201,7 @@ public class PatientsController : ControllerBase
 
         var sb = new StringBuilder();
 
-        // 1) Osobni podaci (bez ID-eva)
+        // 1) Osobni podaci
         sb.AppendLine("Pacijent,OIB,Datum rođenja,Spol,Broj pacijenta");
         sb.AppendLine($"{Q($"{p.FirstName} {p.LastName}")},{Q(p.OIB)},{p.BirthDate:yyyy-MM-dd},{Q(p.Sex)},{Q(p.PatientNumber)}");
         sb.AppendLine();
@@ -180,17 +219,14 @@ public class PatientsController : ControllerBase
         foreach (var v in p.Visits.OrderByDescending(v => v.VisitDateTime))
         {
             var doctor = v.Doctor?.FullName ?? "";
-            var docs = v.Documents.Any()
-                ? string.Join(" | ", v.Documents.Select(d => d.FileName))
-                : "";
+            var docs = v.Documents.Any() ? string.Join(" | ", v.Documents.Select(d => d.FileName)) : "";
             sb.AppendLine($"{v.VisitDateTime:yyyy-MM-dd HH:mm},{Q(v.VisitType)},{Q(doctor)},{Q(v.Notes)},{Q(docs)}");
         }
         sb.AppendLine();
 
-        // 4) Dokumenti pacijenta (ako ih imate na razini pacijenta)
-        // Ako dokumente spremate u istu tablicu s kolonom PatientId:
+        // 4) Dokumenti pacijenta (ako postoji takva tablica/veza)
         var patientDocs = await _db.Documents
-            .Where(d => d.PatientId == id) // prilagodi ako je drugačiji model
+            .Where(d => d.PatientId == id)
             .OrderByDescending(d => d.UploadedAt)
             .ToListAsync();
 
@@ -202,8 +238,15 @@ public class PatientsController : ControllerBase
                 sb.AppendLine($"{Q(d.FileName)},{d.SizeBytes},{d.UploadedAt:yyyy-MM-dd HH:mm}");
         }
 
-        var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+        var bytes = Utf8Bom(sb.ToString());
         var fileName = $"pacijent_{p.LastName}_{p.FirstName}.csv";
         return File(bytes, "text/csv; charset=utf-8", fileName);
     }
+
+    // ===== helpers =====
+    private static string Csv(string? s) =>
+        s is null ? "" : $"\"{s.Replace("\"", "\"\"")}\"";
+
+    private static byte[] Utf8Bom(string text) =>
+        Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(text)).ToArray();
 }

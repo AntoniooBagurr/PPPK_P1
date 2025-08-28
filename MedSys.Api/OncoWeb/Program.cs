@@ -11,10 +11,29 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AppOptions>(builder.Configuration.GetSection("App"));
 var appOptions = builder.Configuration.GetSection("App").Get<AppOptions>() ?? new AppOptions();
 
-builder.Services.AddHttpClient();
+
+
+// HTTP + servis sloj
+builder.Services.AddHttpClient("downloader", c =>
+{
+    c.Timeout = TimeSpan.FromMinutes(30);
+    // neki normalan UA — dosta mirrora to traži
+    c.DefaultRequestHeaders.UserAgent.ParseAdd("OncoWeb/1.0 (+https://localhost)");
+});
 builder.Services.AddSingleton<IStorageService, StorageService>();
 builder.Services.AddSingleton<IngestService>();
-
+builder.Services.AddSingleton<IAmazonS3>(_ =>
+{
+    var cfg = new Amazon.S3.AmazonS3Config
+    {
+        ServiceURL = appOptions.Minio.Endpoint, // npr. "http://localhost:9000"
+        ForcePathStyle = true,
+        UseHttp = appOptions.Minio.Endpoint.StartsWith("http://"),
+        AuthenticationRegion = "us-east-1"
+    };
+    var creds = new Amazon.Runtime.BasicAWSCredentials(appOptions.Minio.AccessKey, appOptions.Minio.SecretKey);
+    return new Amazon.S3.AmazonS3Client(creds, cfg);
+});
 // Mongo
 builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(appOptions.Mongo.ConnectionString));
 builder.Services.AddSingleton(sp =>
@@ -28,27 +47,19 @@ builder.Services.AddSingleton(sp =>
     return db.GetCollection<GeneExpressionDoc>(appOptions.Mongo.Collection);
 });
 
-// MinIO (S3 kompatibilan)
+// MinIO preko S3 API-ja
 builder.Services.AddSingleton<IAmazonS3>(_ =>
 {
     var cfg = new AmazonS3Config
     {
         ServiceURL = appOptions.Minio.Endpoint,
-        ForcePathStyle = true,   
-        UseHttp = appOptions.Minio.Endpoint.StartsWith("http://"),
+        ForcePathStyle = true,
+        UseHttp = appOptions.Minio.Endpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase),
         AuthenticationRegion = "us-east-1"
     };
     var creds = new BasicAWSCredentials(appOptions.Minio.AccessKey, appOptions.Minio.SecretKey);
     return new AmazonS3Client(creds, cfg);
 });
-
-builder.Services.AddHttpClient();
-builder.Services.AddSingleton<StorageService>();
-builder.Services.AddSingleton<IngestService>();
-
-// Background ingest na startu (opcija)
-if (appOptions.IngestOnStartup)
-    builder.Services.AddHostedService<IngestOnStartup>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -65,8 +76,6 @@ app.UseSwaggerUI();
 app.MapControllers();
 
 app.Run();
-
-
 
 public class AppOptions
 {
@@ -90,7 +99,7 @@ public class MongoOptions
 public class MinioOptions
 {
     public string Endpoint { get; set; } = "http://localhost:9000";
-    public string AccessKey { get; set; } = "minio";
-    public string SecretKey { get; set; } = "minio123";
+    public string AccessKey { get; set; } = "minioadmin";
+    public string SecretKey { get; set; } = "minioadmin";
     public string Bucket { get; set; } = "tcga";
 }

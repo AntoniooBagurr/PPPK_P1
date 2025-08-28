@@ -459,6 +459,27 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "MedSys.Api.Controllers.PatientsController",
+    "Method": "ExportListCsv",
+    "RelativePath": "api/Patients/export.csv",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "lastName",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "oib",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "MedSys.Api.Controllers.PrescriptionsController",
     "Method": "Create",
     "RelativePath": "api/Prescriptions",

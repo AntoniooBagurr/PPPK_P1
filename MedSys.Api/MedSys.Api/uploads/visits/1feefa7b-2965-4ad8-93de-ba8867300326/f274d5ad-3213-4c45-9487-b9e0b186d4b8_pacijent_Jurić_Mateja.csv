@@ -1,0 +1,11 @@
+﻿Pacijent,OIB,Datum rođenja,Spol,Broj pacijenta
+"Mateja Jurić","95584992710",1976-06-05,"F","P-0004"
+
+Povijest bolesti
+Naziv,Početak,Kraj
+"Prehlada",2025-08-27,2025-08-28
+
+Pregledi
+Datum/vrijeme,Tip,Liječnik,Bilješka,Dokumenti
+2025-08-26 11:34,"GP","Ante","string",""
+

@@ -2,8 +2,13 @@
 {
     public class IngestRequest
     {
-        public string Cohort { get; set; } = string.Empty;
+        public List<IngestJob> Jobs { get; set; } = new();
+    }
 
-        public List<string> TsvUrls { get; set; } = new();
+    public class IngestJob
+    {
+        public string Cohort { get; set; } = default!;
+        public string Url { get; set; } = default!;
+        public string? ObjectName { get; set; }
     }
 }
