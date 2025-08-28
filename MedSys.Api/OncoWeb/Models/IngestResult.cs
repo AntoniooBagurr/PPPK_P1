@@ -3,7 +3,6 @@
     public class IngestResult
     {
         public List<IngestItemResult> Downloaded { get; set; } = new();
-        public List<string> Uploaded { get; set; } = new();
         public List<string> Errors { get; set; } = new();
     }
 

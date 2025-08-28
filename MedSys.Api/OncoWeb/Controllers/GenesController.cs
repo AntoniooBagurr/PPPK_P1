@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using OncoWeb;
+using OncoWeb.Models;
 
 public record GeneQuery(string Cohort, string[] Patients, string[]? Genes);
 
@@ -18,7 +19,7 @@ public class GenesController : ControllerBase
         _defaultGenes = app.Value.Genes;
     }
 
-
+/*
     [HttpGet("{cohort}/{patientId}")]
     public async Task<ActionResult<GeneExpressionDoc>> GetOne(string cohort, string patientId)
     {
@@ -61,5 +62,5 @@ public class GenesController : ControllerBase
             });
 
         return Ok(shaped);
-    }
+    }*/
 }

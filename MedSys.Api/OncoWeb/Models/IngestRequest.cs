@@ -7,8 +7,8 @@
 
     public class IngestJob
     {
-        public string Cohort { get; set; } = default!;
-        public string Url { get; set; } = default!;
+        public string Cohort { get; set; } = "";        
+        public string Url { get; set; } = "";           
         public string? ObjectName { get; set; }
     }
 }

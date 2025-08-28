@@ -4,39 +4,33 @@ using Amazon.S3.Util;
 
 namespace OncoWeb.Services;
 
-public class StorageService : IStorageService
+public class S3MinioStorageService : IStorageService
 {
     private readonly IAmazonS3 _s3;
 
-    public StorageService(IAmazonS3 s3) => _s3 = s3;
+    public S3MinioStorageService(IAmazonS3 s3) => _s3 = s3;
 
     public async Task EnsureBucketAsync(string bucket, CancellationToken ct = default)
     {
         var exists = await AmazonS3Util.DoesS3BucketExistV2Async(_s3, bucket);
         if (!exists)
         {
-            var put = new PutBucketRequest { BucketName = bucket, UseClientRegion = true };
-            await _s3.PutBucketAsync(put, ct);
+            await _s3.PutBucketAsync(new PutBucketRequest { BucketName = bucket }, ct);
         }
     }
 
-    public async Task PutAsync(string bucket, string key, Stream data, long length, string contentType, CancellationToken ct = default)
+    public async Task PutObjectAsync(string bucket, string objectName, Stream data, string contentType, CancellationToken ct = default)
     {
+        // pobrini se da stream kreće s početka
         if (data.CanSeek) data.Position = 0;
 
         var req = new PutObjectRequest
         {
             BucketName = bucket,
-            Key = key,
+            Key = objectName,
             InputStream = data,
-            AutoCloseStream = false,
             ContentType = string.IsNullOrWhiteSpace(contentType) ? "application/octet-stream" : contentType
         };
         await _s3.PutObjectAsync(req, ct);
-    }
-
-    public Task PutObjectAsync(string bucket, string objectName, Stream data, string contentType, CancellationToken ct = default)
-    {
-        throw new NotImplementedException();
     }
 }

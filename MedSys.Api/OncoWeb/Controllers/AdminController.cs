@@ -9,8 +9,16 @@ namespace OncoWeb.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly IngestService _svc;
+    private readonly IStorageService _storage;
+    private readonly Microsoft.Extensions.Options.IOptions<AppOptions> _opts;
 
-    public AdminController(IngestService svc) => _svc = svc;
+    public AdminController(
+        IngestService svc,
+        IStorageService storage,
+        Microsoft.Extensions.Options.IOptions<AppOptions> opts)
+    {
+        _svc = svc; _storage = storage; _opts = opts;
+    }
 
     [HttpPost("ingest")]
     public async Task<IActionResult> Ingest([FromBody] IngestRequest req, CancellationToken ct)
@@ -19,29 +27,30 @@ public class AdminController : ControllerBase
             return BadRequest("jobs je obavezan.");
 
         var result = await _svc.RunAsync(req, ct);
+        if (result.Errors.Count == req.Jobs.Count && result.Downloaded.Count == 0)
+            return StatusCode(502, result);
+
         return Ok(result);
     }
 
-    // POST /api/admin/ingest/single
-    [HttpPost("ingest/single")]
-    public async Task<IActionResult> IngestSingle([FromBody] IngestJob job, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(job?.Cohort) || string.IsNullOrWhiteSpace(job.Url))
-            return BadRequest("cohort i url su obavezni.");
-
-        var result = await _svc.RunAsync(new IngestRequest { Jobs = new() { job } }, ct);
-        return Ok(result);
-    }
-
+ 
     [HttpPost("ingest/local")]
-    public async Task<IActionResult> IngestLocal([FromForm] string cohort, [FromForm] IFormFile file, CancellationToken ct)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> IngestLocal([FromForm] IngestLocalForm form, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(cohort)) return BadRequest("cohort je obavezan.");
-        if (file == null || file.Length == 0) return BadRequest("file je obavezan.");
+        if (string.IsNullOrWhiteSpace(form.Cohort))
+            return BadRequest("cohort je obavezan.");
+        if (form.File == null || form.File.Length == 0)
+            return BadRequest("file je obavezan.");
 
-        var objectName = $"{cohort.ToLowerInvariant()}/{Path.GetFileName(file.FileName)}";
-        await _svc.UploadLocalAsync(objectName, file.ContentType ?? "application/octet-stream", file.OpenReadStream(), file.Length, ct);
-        return Ok(new { uploaded = objectName, bytes = file.Length });
+        var bucket = _opts.Value.Minio.Bucket;
+        await _storage.EnsureBucketAsync(bucket, ct);
+
+        var objectName = $"{form.Cohort.ToLowerInvariant()}/{Path.GetFileName(form.File.FileName)}";
+        await using var s = form.File.OpenReadStream();
+        await _storage.PutObjectAsync(bucket, objectName, s,
+            form.File.ContentType ?? "application/octet-stream", ct);
+
+        return Ok(new { saved = objectName, bytes = form.File.Length });
     }
-
 }

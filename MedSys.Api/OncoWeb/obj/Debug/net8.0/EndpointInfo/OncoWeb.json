@@ -36,104 +36,33 @@
         }
       }
     },
-    "/api/admin/ingest/single": {
+    "/api/admin/ingest/local": {
       "post": {
         "tags": [
           "Admin"
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/IngestJob"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IngestJob"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/IngestJob"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/genes/{cohort}/{patientId}": {
-      "get": {
-        "tags": [
-          "Genes"
-        ],
-        "parameters": [
-          {
-            "name": "cohort",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "patientId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/GeneExpressionDoc"
+                "type": "object",
+                "properties": {
+                  "Cohort": {
+                    "type": "string"
+                  },
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  }
                 }
               },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GeneExpressionDoc"
+              "encoding": {
+                "Cohort": {
+                  "style": "form"
+                },
+                "File": {
+                  "style": "form"
                 }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GeneExpressionDoc"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/genes/query": {
-      "post": {
-        "tags": [
-          "Genes"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GeneQuery"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GeneQuery"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/GeneQuery"
               }
             }
           }
@@ -148,59 +77,6 @@
   },
   "components": {
     "schemas": {
-      "GeneExpressionDoc": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "$ref": "#/components/schemas/ObjectId"
-          },
-          "patientId": {
-            "type": "string",
-            "nullable": true
-          },
-          "cancerCohort": {
-            "type": "string",
-            "nullable": true
-          },
-          "expressions": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
-          },
-          "ingestedAtUtc": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
-      "GeneQuery": {
-        "type": "object",
-        "properties": {
-          "cohort": {
-            "type": "string",
-            "nullable": true
-          },
-          "patients": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "genes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "IngestJob": {
         "type": "object",
         "properties": {
@@ -228,22 +104,6 @@
               "$ref": "#/components/schemas/IngestJob"
             },
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "ObjectId": {
-        "type": "object",
-        "properties": {
-          "timestamp": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          },
-          "creationTime": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
           }
         },
         "additionalProperties": false

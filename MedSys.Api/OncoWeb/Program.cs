@@ -1,40 +1,21 @@
-using Amazon;
+Ôªøusing Amazon.S3;
+using Amazon.S3.Model;
 using Amazon.Runtime;
-using Amazon.S3;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using OncoWeb.Models;
 using OncoWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Options
+// -- options (ƒçitamo "App" iz appsettings.*)
 builder.Services.Configure<AppOptions>(builder.Configuration.GetSection("App"));
 var appOptions = builder.Configuration.GetSection("App").Get<AppOptions>() ?? new AppOptions();
 
+// HttpClient za skidanja
+builder.Services.AddHttpClient();
 
-
-// HTTP + servis sloj
-builder.Services.AddHttpClient("downloader", c =>
-{
-    c.Timeout = TimeSpan.FromMinutes(30);
-    // neki normalan UA ó dosta mirrora to traûi
-    c.DefaultRequestHeaders.UserAgent.ParseAdd("OncoWeb/1.0 (+https://localhost)");
-});
-builder.Services.AddSingleton<IStorageService, StorageService>();
-builder.Services.AddSingleton<IngestService>();
-builder.Services.AddSingleton<IAmazonS3>(_ =>
-{
-    var cfg = new Amazon.S3.AmazonS3Config
-    {
-        ServiceURL = appOptions.Minio.Endpoint, // npr. "http://localhost:9000"
-        ForcePathStyle = true,
-        UseHttp = appOptions.Minio.Endpoint.StartsWith("http://"),
-        AuthenticationRegion = "us-east-1"
-    };
-    var creds = new Amazon.Runtime.BasicAWSCredentials(appOptions.Minio.AccessKey, appOptions.Minio.SecretKey);
-    return new Amazon.S3.AmazonS3Client(creds, cfg);
-});
-// Mongo
+// Mongo (za ishod 3)
 builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(appOptions.Mongo.ConnectionString));
 builder.Services.AddSingleton(sp =>
 {
@@ -47,25 +28,29 @@ builder.Services.AddSingleton(sp =>
     return db.GetCollection<GeneExpressionDoc>(appOptions.Mongo.Collection);
 });
 
-// MinIO preko S3 API-ja
+// MinIO preko AWS S3 SDK (radi i za lokalni MinIO)
 builder.Services.AddSingleton<IAmazonS3>(_ =>
 {
     var cfg = new AmazonS3Config
     {
-        ServiceURL = appOptions.Minio.Endpoint,
+        ServiceURL = appOptions.Minio.Endpoint, // npr. http://localhost:9000
         ForcePathStyle = true,
-        UseHttp = appOptions.Minio.Endpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase),
+        UseHttp = appOptions.Minio.Endpoint.StartsWith("http://"),
         AuthenticationRegion = "us-east-1"
     };
     var creds = new BasicAWSCredentials(appOptions.Minio.AccessKey, appOptions.Minio.SecretKey);
     return new AmazonS3Client(creds, cfg);
 });
 
+// storage servis i ingest servis
+builder.Services.AddSingleton<IStorageService, S3MinioStorageService>();
+builder.Services.AddSingleton<IngestService>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(o =>
+builder.Services.AddSwaggerGen(c =>
 {
-    o.SwaggerDoc("v1", new OpenApiInfo { Title = "OncoWeb API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "OncoWeb API", Version = "v1" });
 });
 
 var app = builder.Build();
@@ -76,6 +61,9 @@ app.UseSwaggerUI();
 app.MapControllers();
 
 app.Run();
+
+
+// ======= Options/Models za binding =======
 
 public class AppOptions
 {
@@ -103,3 +91,6 @@ public class MinioOptions
     public string SecretKey { get; set; } = "minioadmin";
     public string Bucket { get; set; } = "tcga";
 }
+
+
+

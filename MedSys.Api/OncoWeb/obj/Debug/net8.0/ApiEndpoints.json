@@ -24,102 +24,14 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "cohort",
+        "Name": "Cohort",
         "Type": "System.String",
         "IsRequired": false
       },
       {
-        "Name": "ContentType",
-        "Type": "System.String",
+        "Name": "File",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
         "IsRequired": false
-      },
-      {
-        "Name": "ContentDisposition",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "Headers",
-        "Type": "Microsoft.AspNetCore.Http.IHeaderDictionary",
-        "IsRequired": false
-      },
-      {
-        "Name": "Length",
-        "Type": "System.Int64",
-        "IsRequired": false
-      },
-      {
-        "Name": "Name",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "FileName",
-        "Type": "System.String",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "OncoWeb.Controllers.AdminController",
-    "Method": "IngestSingle",
-    "RelativePath": "api/admin/ingest/single",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "job",
-        "Type": "OncoWeb.Models.IngestJob",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "GenesController",
-    "Method": "GetOne",
-    "RelativePath": "api/genes/{cohort}/{patientId}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "cohort",
-        "Type": "System.String",
-        "IsRequired": true
-      },
-      {
-        "Name": "patientId",
-        "Type": "System.String",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "GeneExpressionDoc",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "GenesController",
-    "Method": "Query",
-    "RelativePath": "api/genes/query",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "q",
-        "Type": "GeneQuery",
-        "IsRequired": true
       }
     ],
     "ReturnTypes": []

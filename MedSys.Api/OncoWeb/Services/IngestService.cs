@@ -1,6 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Net.Http.Headers;
 using OncoWeb.Models;
-using System.Net.Http.Headers;
 
 namespace OncoWeb.Services;
 
@@ -8,13 +7,25 @@ public class IngestService
 {
     private readonly IHttpClientFactory _http;
     private readonly IStorageService _storage;
-    private readonly AppOptions _opts;
+    private readonly Microsoft.Extensions.Options.IOptions<AppOptions> _opts;
 
-    public IngestService(IHttpClientFactory http, IStorageService storage, IOptions<AppOptions> opts)
+    public IngestService(IHttpClientFactory http, IStorageService storage, Microsoft.Extensions.Options.IOptions<AppOptions> opts)
     {
         _http = http;
         _storage = storage;
-        _opts = opts.Value;
+        _opts = opts;
+    }
+
+    private static bool LooksLikeUrl(string s) => s.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                                                 s.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+
+    // pomoć: generiraj moguće mirror URL-ove ako je stiglo samo ime datoteke
+    private static IEnumerable<string> BuildCandidates(string fileName)
+    {
+        // redoslijed probavanja (neki znaju vraćati 403/404 – zato fallback)
+        yield return $"https://tcga.xenahubs.net/download?filename={Uri.EscapeDataString(fileName)}";
+        yield return $"https://gdc-hub.s3.us-east-1.amazonaws.com/download/{fileName}";
+        yield return $"https://toil-xena-hub.s3.us-east-1.amazonaws.com/download/{fileName}";
     }
 
     public async Task<IngestResult> RunAsync(IngestRequest req, CancellationToken ct)
@@ -22,110 +33,81 @@ public class IngestService
         var result = new IngestResult();
         if (req?.Jobs == null || req.Jobs.Count == 0) return result;
 
-        // bucket u MinIO
-        const string bucket = "tcga";
+        var bucket = _opts.Value.Minio.Bucket;
         await _storage.EnsureBucketAsync(bucket, ct);
 
         var client = _http.CreateClient();
-        // ProductInfoHeaderValue ne voli zagrade – zato TryAddWithoutValidation:
-        client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "curl/8.7");
+        // jednostavan UA (bez “comment” dijela – izbjegava FormatException)
+        client.DefaultRequestHeaders.UserAgent.Clear();
+        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("OncoWeb", "1.0"));
 
         foreach (var job in req.Jobs)
         {
             if (string.IsNullOrWhiteSpace(job.Cohort) || string.IsNullOrWhiteSpace(job.Url))
             {
-                result.Errors.Add("cohort i url su obavezni.");
+                result.Errors.Add("Prazan cohort ili url.");
                 continue;
             }
 
-            var candidates = BuildCandidates(job.Url);
+            var urlCandidates = new List<string>();
+            if (LooksLikeUrl(job.Url))
+            {
+                urlCandidates.Add(job.Url.Trim());
+            }
+            else
+            {
+                urlCandidates.AddRange(BuildCandidates(job.Url.Trim()));
+            }
 
-            Exception? last = null;
-            foreach (var uri in candidates)
+            HttpResponseMessage? okResp = null;
+            string? okUrl = null;
+
+            foreach (var u in urlCandidates)
             {
                 try
                 {
-                    // 1) kratki “probe” – neki serveri blokiraju HEAD pa radimo GET s Range: 0-0
-                    using (var probeReq = new HttpRequestMessage(HttpMethod.Get, uri))
+                    var resp = await client.GetAsync(u, HttpCompletionOption.ResponseHeadersRead, ct);
+                    if (resp.IsSuccessStatusCode)
                     {
-                        probeReq.Headers.Range = new RangeHeaderValue(0, 0);
-                        using var probe = await client.SendAsync(
-                            probeReq,
-                            HttpCompletionOption.ResponseHeadersRead, ct);
-
-                        if (!probe.IsSuccessStatusCode)
-                        {
-                            last = new HttpRequestException($"{(int)probe.StatusCode} {probe.ReasonPhrase}");
-                            continue;
-                        }
+                        okResp = resp;
+                        okUrl = u;
+                        break;
                     }
-
-                    // 2) puni download
-                    using var resp = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct);
-                    resp.EnsureSuccessStatusCode();
-
-                    var contentType = resp.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
-                    var size = resp.Content.Headers.ContentLength ?? -1;
-                    await using var stream = await resp.Content.ReadAsStreamAsync(ct);
-
-                    var fileName = Path.GetFileName(uri.LocalPath);
-                    var objectName = $"{job.Cohort.ToLowerInvariant()}/{fileName}";
-
-                    await _storage.PutObjectAsync(bucket, objectName, stream, contentType, size, ct);
-
-                    result.Downloaded.Add(new IngestItemResult
-                    {
-                        Cohort = job.Cohort,
-                        Url = uri.ToString(),
-                        ObjectName = objectName,
-                        Bytes = size
-                    });
-
-                    last = null;
-                    break; // ovaj kandidat je uspio
+                    resp.Dispose();
                 }
-                catch (Exception ex)
-                {
-                    last = ex;
-                }
+                catch { /* ignoriraj i probaj sljedeći mirror */ }
             }
 
-            if (last != null)
-                result.Errors.Add($"{job.Url}: {last.Message}");
-        }
+            if (okResp == null)
+            {
+                result.Errors.Add($"Nisam uspio dohvatiti {job.Url} s nijednog mirrora.");
+                continue;
+            }
 
-        if (result.Downloaded.Count == 0 && result.Errors.Count > 0)
-            throw new HttpRequestException($"Nisam uspio dohvatiti {req.Jobs[0].Url} s nijednog mirrora.");
+            using (okResp)
+            {
+                var ctType = okResp.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
+                var fileName = Path.GetFileName(okResp.RequestMessage!.RequestUri!.LocalPath);
+                if (string.IsNullOrWhiteSpace(fileName) || !fileName.Contains('.'))
+                    fileName = Path.GetFileName(job.Url); // fallback
+
+                var objectName = string.IsNullOrWhiteSpace(job.ObjectName)
+                    ? $"{job.Cohort.ToLowerInvariant()}/{fileName}"
+                    : job.Cohort.ToLowerInvariant() + "/" + job.ObjectName.TrimStart('/');
+
+                await using var s = await okResp.Content.ReadAsStreamAsync(ct);
+                await _storage.PutObjectAsync(bucket, objectName, s, ctType, ct);
+
+                result.Downloaded.Add(new IngestItemResult
+                {
+                    Cohort = job.Cohort,
+                    Url = okUrl!,
+                    ObjectName = objectName,
+                    Bytes = okResp.Content.Headers.ContentLength ?? 0
+                });
+            }
+        }
 
         return result;
-    }
-
-    public async Task UploadLocalAsync(string objectName, string contentType, Stream data, long size, CancellationToken ct)
-    {
-        const string bucket = "tcga";
-        await _storage.EnsureBucketAsync(bucket, ct);
-        await _storage.PutObjectAsync(bucket, objectName, data, contentType, size, ct);
-    }
-
-    private static IEnumerable<Uri> BuildCandidates(string given)
-    {
-        // ako dođe puni apsolutni URL i nije S3 – probaj njega
-        if (Uri.TryCreate(given, UriKind.Absolute, out var abs))
-        {
-            // Ako je netko ipak zalijepio s3.amazonaws.com link, preskačemo ga (403 bez potpisa)
-            if (!abs.Host.Contains("amazonaws", StringComparison.OrdinalIgnoreCase))
-                yield return abs;
-            yield break;
-        }
-
-        // očekujemo samo ime datoteke, npr. "TCGA-BRCA.htseq_fpkm-uq.tsv.gz"
-        var f = given.Trim();
-
-        // **ISKLJUČIVO Xena hub – path varijanta**
-        yield return new Uri($"https://tcga.xenahubs.net/download/{Uri.EscapeDataString(f)}");
-
-        // Ako baš želiš i query varijantu, možeš odkomentirati,
-        // ali path radi pouzdanije:
-        // yield return new Uri($"https://tcga.xenahubs.net/download?filename={Uri.EscapeDataString(f)}");
     }
 }
