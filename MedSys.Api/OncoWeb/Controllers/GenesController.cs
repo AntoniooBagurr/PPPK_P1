@@ -20,13 +20,15 @@ public class GenesController : ControllerBase
     private readonly IMongoCollection<GeneExpressionDoc> _col;
     private readonly Microsoft.Extensions.Options.IOptions<AppOptions> _opts;
     private readonly IAmazonS3 _s3;
+    IMongoCollection<ClinicalDoc> _clinical;
 
-    public GenesController(GeneImportService import, IMongoCollection<GeneExpressionDoc> col, IOptions<AppOptions> opts, IAmazonS3 s3)
+    public GenesController(GeneImportService import, IMongoCollection<GeneExpressionDoc> col, IOptions<AppOptions> opts, IAmazonS3 s3, IMongoCollection<ClinicalDoc> clinical)
     {
         _import = import;
         _col = col;
         _opts = opts;
         _s3 = s3;
+        _clinical = clinical;
     }
 
     private string[] GetPanelGenes()
@@ -156,27 +158,35 @@ public class GenesController : ControllerBase
     [HttpGet("{cohort}/panel/{patientId}")]
     public async Task<ActionResult<object>> GetPanel(string cohort, string patientId, CancellationToken ct)
     {
-        var panel = GetPanelGenes();
-        var proj = Builders<GeneExpressionDoc>.Projection
-            .Include(d => d.PatientId)
-            .Include(d => d.CancerCohort)
-            .Include(d => d.Genes);
-        var doc = await _col.Find(d => d.CancerCohort == cohort && d.PatientId == patientId)
-                            .Project<GeneExpressionDoc>(proj)
+        var doc = await _col.Find(d => d.CancerCohort == cohort && d.PatientId == patientId.ToUpperInvariant())
                             .FirstOrDefaultAsync(ct);
         if (doc is null) return NotFound();
 
-        var dict = new Dictionary<string, double>();
-        foreach (var g in panel)
-            if (doc.Genes.TryGetValue(g, out var v)) dict[g] = v;
+        var wanted = _opts.Value.Genes.Select(g => g.ToUpperInvariant().Replace("IL8", "CXCL8")).ToArray();
+        var panel = wanted.ToDictionary(
+            g => g,
+            g => doc.Genes.TryGetValue(g, out var v) ? v : (double?)null
+        );
 
-        return Ok(new
+        var clin = await _clinical.Find(c => c.CancerCohort == cohort && c.PatientId == doc.PatientId)
+                                  .FirstOrDefaultAsync(ct);
+
+        var response = new
         {
-            doc.PatientId,
-            doc.CancerCohort,
-            Genes = dict   
-        });
+            patientId = doc.PatientId,
+            cancerCohort = doc.CancerCohort,
+            genes = panel,
+            clinical = clin is null ? null : new
+            {
+                DSS = clin.DSS,
+                OS = clin.OS,
+                clinical_stage = clin.ClinicalStage
+            }
+        };
+
+        return Ok(response);
     }
+
 
     [HttpGet("{cohort}/gene/{gene}/top")]
     public async Task<ActionResult<List<object>>> TopByGene(

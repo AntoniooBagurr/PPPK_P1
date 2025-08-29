@@ -74,6 +74,81 @@
         }
       }
     },
+    "/api/clinical/import": {
+      "post": {
+        "tags": [
+          "Clinical"
+        ],
+        "parameters": [
+          {
+            "name": "cohort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "objectName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/clinical/{cohort}/{patientId}": {
+      "get": {
+        "tags": [
+          "Clinical"
+        ],
+        "parameters": [
+          {
+            "name": "cohort",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalDoc"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalDoc"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalDoc"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/genes/{cohort}/patients": {
       "get": {
         "tags": [
@@ -241,6 +316,37 @@
   },
   "components": {
     "schemas": {
+      "ClinicalDoc": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ObjectId"
+          },
+          "patientId": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancerCohort": {
+            "type": "string",
+            "nullable": true
+          },
+          "dss": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "os": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "clinicalStage": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "IngestJob": {
         "type": "object",
         "properties": {
@@ -268,6 +374,22 @@
               "$ref": "#/components/schemas/IngestJob"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ObjectId": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "creationTime": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
           }
         },
         "additionalProperties": false

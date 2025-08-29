@@ -46,6 +46,11 @@ builder.Services.AddSingleton<IAmazonS3>(_ =>
 // storage servis + ingest servis
 builder.Services.AddSingleton<IStorageService, S3MinioStorageService>();
 builder.Services.AddSingleton<IngestService>();
+builder.Services.AddSingleton(sp =>
+{
+    var db = sp.GetRequiredService<IMongoDatabase>();
+    return db.GetCollection<ClinicalDoc>("clinical_survival");
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

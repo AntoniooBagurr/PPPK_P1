@@ -37,6 +37,58 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "OncoWeb.Controllers.ClinicalController",
+    "Method": "GetOne",
+    "RelativePath": "api/clinical/{cohort}/{patientId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "cohort",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "patientId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "OncoWeb.Models.ClinicalDoc",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "OncoWeb.Controllers.ClinicalController",
+    "Method": "Import",
+    "RelativePath": "api/clinical/import",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "cohort",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "objectName",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "OncoWeb.Controllers.GenesController",
     "Method": "TopByGene",
     "RelativePath": "api/genes/{cohort}/gene/{gene}/top",
