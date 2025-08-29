@@ -20,6 +20,16 @@ public class StorageService : IStorageService
         }
     }
 
+    public Task<Stream> GetObjectStreamAsync(string bucket, string objectName, CancellationToken ct = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<List<string>> ListAsync(string bucket, string prefix, CancellationToken ct = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task PutAsync(string bucket, string key, Stream data, long length, string contentType, CancellationToken ct = default)
     {
         if (data.CanSeek) data.Position = 0;

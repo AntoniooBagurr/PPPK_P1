@@ -16,9 +16,39 @@ public class S3MinioStorageService : IStorageService
             await _s3.PutBucketAsync(new PutBucketRequest { BucketName = bucket }, ct);
     }
 
+    public async Task<Stream> GetObjectStreamAsync(string bucket, string objectName, CancellationToken ct = default)
+    {
+        var resp = await _s3.GetObjectAsync(new GetObjectRequest { BucketName = bucket, Key = objectName }, ct);
+        
+        var ms = new MemoryStream();
+        await resp.ResponseStream.CopyToAsync(ms, ct);
+        ms.Position = 0;
+        resp.Dispose();
+        return ms;
+    }
+
+    public async Task<List<string>> ListAsync(string bucket, string prefix, CancellationToken ct = default)
+    {
+        var keys = new List<string>();
+        string? token = null;
+        do
+        {
+            var resp = await _s3.ListObjectsV2Async(new ListObjectsV2Request
+            {
+                BucketName = bucket,
+                Prefix = prefix,
+                ContinuationToken = token
+            }, ct);
+            keys.AddRange(resp.S3Objects.Select(o => o.Key));
+            token = (bool)resp.IsTruncated ? resp.NextContinuationToken : null;
+        }
+        while (token != null);
+        return keys;
+    }
+
     public async Task PutObjectAsync(string bucket, string objectName, Stream data, string contentType, CancellationToken ct = default)
     {
-        // S3 traži poznatu duljinu/seekable stream – po potrebi bufferaj
+     
         Stream toSend = data;
         if (!data.CanSeek)
         {

@@ -10,5 +10,7 @@
             Stream data,
             string contentType,
             CancellationToken ct = default);
+        Task<List<string>> ListAsync(string bucket, string prefix, CancellationToken ct = default);
+        Task<Stream> GetObjectStreamAsync(string bucket, string objectName, CancellationToken ct = default);
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Amazon.S3;
-using Amazon.Runtime;               // BasicAWSCredentials
+using Amazon.Runtime;               
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using OncoWeb.Models;
@@ -7,17 +7,27 @@ using OncoWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// options (App sekcija iz appsettings)
+
 builder.Services.Configure<AppOptions>(builder.Configuration.GetSection("App"));
 var appOptions = builder.Configuration.GetSection("App").Get<AppOptions>() ?? new AppOptions();
 
 // HttpClient
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("xena", c =>
+{
+    c.Timeout = TimeSpan.FromMinutes(15);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    AutomaticDecompression = System.Net.DecompressionMethods.All
+});
 
-// Mongo (za ishod 3)
+
+// Mongo 
 builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(appOptions.Mongo.ConnectionString));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IMongoClient>().GetDatabase(appOptions.Mongo.Database));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IMongoDatabase>().GetCollection<GeneExpressionDoc>(appOptions.Mongo.Collection));
+builder.Services.AddSingleton<GeneImportService>();
+
 
 // MinIO preko AWS S3 SDK
 builder.Services.AddSingleton<IAmazonS3>(_ =>

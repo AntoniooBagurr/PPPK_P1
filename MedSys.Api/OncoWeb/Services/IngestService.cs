@@ -24,8 +24,10 @@ public class IngestService
 
         if (Uri.TryCreate(input, UriKind.Absolute, out var uri))
         {
+           
             yield return input;
 
+         
             var local = Path.GetFileName(uri.LocalPath);
             if (string.Equals(local, "download", StringComparison.OrdinalIgnoreCase))
             {
@@ -35,11 +37,17 @@ public class IngestService
             }
             else file = local;
         }
-        else file = input;
+        else
+        {
+         
+            file = input;
+        }
 
         if (!string.IsNullOrWhiteSpace(file))
         {
             var enc = Uri.EscapeDataString(file);
+
+          
             yield return $"https://tcga.xenahubs.net/download?filename={enc}";
             yield return $"https://pancanatlas.xenahubs.net/download/{enc}";
             yield return $"https://pancanatlas.xenahubs.net/download?filename={enc}";
@@ -55,9 +63,15 @@ public class IngestService
         var bucket = _opts.Minio.Bucket;
         await _storage.EnsureBucketAsync(bucket, ct);
 
+
         var client = _http.CreateClient("xena");
-        client.DefaultRequestHeaders.UserAgent.Clear();
-        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("OncoWeb", "1.0"));
+
+  
+        client.DefaultRequestHeaders.Clear();
+        client.DefaultRequestHeaders.TryAddWithoutValidation(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "*/*");
 
         foreach (var job in req.Jobs)
         {
@@ -72,6 +86,7 @@ public class IngestService
             HttpResponseMessage? okResp = null;
             string? okUrl = null;
 
+         
             foreach (var u in candidates)
             {
                 try
@@ -87,7 +102,7 @@ public class IngestService
                 }
                 catch
                 {
-                    // probaj sljedeći mirror
+                   
                 }
             }
 
@@ -116,15 +131,19 @@ public class IngestService
                     ? $"{job.Cohort.ToLowerInvariant()}/{fileName}"
                     : job.Cohort.ToLowerInvariant() + "/" + job.ObjectName.TrimStart('/');
 
-                await using var stream = await okResp.Content.ReadAsStreamAsync(ct);
-                await _storage.PutObjectAsync(bucket, objectName, stream, contentType, ct);
+                await using var netStream = await okResp.Content.ReadAsStreamAsync(ct);
+                using var ms = new MemoryStream();
+                await netStream.CopyToAsync(ms, ct);
+                ms.Position = 0;
+
+                await _storage.PutObjectAsync(bucket, objectName, ms, contentType, ct);
 
                 result.Downloaded.Add(new IngestItemResult
                 {
                     Cohort = job.Cohort,
                     Url = okUrl!,
                     ObjectName = objectName,
-                    Bytes = okResp.Content.Headers.ContentLength ?? 0
+                    Bytes = okResp.Content.Headers.ContentLength ?? ms.Length
                 });
             }
         }
