@@ -38,8 +38,44 @@
   },
   {
     "ContainingType": "OncoWeb.Controllers.GenesController",
-    "Method": "GetOne",
-    "RelativePath": "api/genes/{cohort}/{patientId}",
+    "Method": "TopByGene",
+    "RelativePath": "api/genes/{cohort}/gene/{gene}/top",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "cohort",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "gene",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "limit",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "OncoWeb.Controllers.GenesController",
+    "Method": "GetPanel",
+    "RelativePath": "api/genes/{cohort}/panel/{patientId}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -55,48 +91,38 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "OncoWeb.Models.GeneExpressionDoc",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "OncoWeb.Controllers.GenesController",
-    "Method": "ByIds",
-    "RelativePath": "api/genes/by-ids",
-    "HttpMethod": "POST",
+    "Method": "ListPatients",
+    "RelativePath": "api/genes/{cohort}/patients",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "cohort",
         "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "prefix",
+        "Type": "System.String",
         "IsRequired": false
       },
       {
-        "Name": "ids",
-        "Type": "System.Collections.Generic.List\u00601[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": true
+        "Name": "skip",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "take",
+        "Type": "System.Int32",
+        "IsRequired": false
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "System.Collections.Generic.List\u00601[[OncoWeb.Models.GeneExpressionDoc, OncoWeb, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "OncoWeb.Controllers.GenesController",

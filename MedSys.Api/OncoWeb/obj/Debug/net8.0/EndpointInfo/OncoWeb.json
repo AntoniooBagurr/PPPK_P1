@@ -74,6 +74,53 @@
         }
       }
     },
+    "/api/genes/{cohort}/patients": {
+      "get": {
+        "tags": [
+          "Genes"
+        ],
+        "parameters": [
+          {
+            "name": "cohort",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "prefix",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "take",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/genes/import": {
       "post": {
         "tags": [
@@ -102,7 +149,7 @@
         }
       }
     },
-    "/api/genes/{cohort}/{patientId}": {
+    "/api/genes/{cohort}/panel/{patientId}": {
       "get": {
         "tags": [
           "Genes"
@@ -127,70 +174,43 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/GeneExpressionDoc"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GeneExpressionDoc"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GeneExpressionDoc"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
     },
-    "/api/genes/by-ids": {
-      "post": {
+    "/api/genes/{cohort}/gene/{gene}/top": {
+      "get": {
         "tags": [
           "Genes"
         ],
         "parameters": [
           {
             "name": "cohort",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            },
-            "text/json": {
-              "schema": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
+          },
+          {
+            "name": "gene",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -198,25 +218,19 @@
               "text/plain": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GeneExpressionDoc"
-                  }
+                  "items": { }
                 }
               },
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GeneExpressionDoc"
-                  }
+                  "items": { }
                 }
               },
               "text/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GeneExpressionDoc"
-                  }
+                  "items": { }
                 }
               }
             }
@@ -227,32 +241,6 @@
   },
   "components": {
     "schemas": {
-      "GeneExpressionDoc": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "nullable": true
-          },
-          "patientId": {
-            "type": "string",
-            "nullable": true
-          },
-          "cancerCohort": {
-            "type": "string",
-            "nullable": true
-          },
-          "genes": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number",
-              "format": "double"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "IngestJob": {
         "type": "object",
         "properties": {

@@ -2,7 +2,9 @@
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using OncoWeb.Models;
 using OncoWeb.Services;
 using System.Globalization;
@@ -26,6 +28,35 @@ public class GenesController : ControllerBase
         _opts = opts;
         _s3 = s3;
     }
+
+    private string[] GetPanelGenes()
+    {
+        var s = new HashSet<string>(_opts.Value.Genes.Select(g => g.ToUpperInvariant()));
+        s.Remove("IL8"); s.Add("CXCL8");
+        return s.ToArray();
+    }
+
+    [HttpGet("{cohort}/patients")]
+    public async Task<ActionResult<object>> ListPatients(
+    string cohort, [FromQuery] string? prefix, [FromQuery] int skip = 0, [FromQuery] int take = 50, CancellationToken ct = default)
+    {
+        if (take is < 1 or > 500) take = 50;
+        var q = _col.AsQueryable().Where(d => d.CancerCohort == cohort);
+        if (!string.IsNullOrWhiteSpace(prefix))
+        {
+            var p = prefix.ToUpperInvariant();
+            q = q.Where(d => d.PatientId.StartsWith(p));
+        }
+
+        var total = await q.CountAsync(ct);
+        var ids = await q.Select(d => d.PatientId)
+                         .OrderBy(id => id)
+                         .Skip(skip).Take(take)
+                         .ToListAsync(ct);
+
+        return Ok(new { total, items = ids });
+    }
+
 
     [HttpPost("import")]
     public async Task<IActionResult> Import([FromQuery] string cohort,
@@ -122,17 +153,60 @@ public class GenesController : ControllerBase
     }
 
 
-    [HttpGet("{cohort}/{patientId}")]
-    public async Task<ActionResult<GeneExpressionDoc>> GetOne(string cohort, string patientId, CancellationToken ct)
+    [HttpGet("{cohort}/panel/{patientId}")]
+    public async Task<ActionResult<object>> GetPanel(string cohort, string patientId, CancellationToken ct)
     {
-        var doc = await _col.Find(d => d.CancerCohort == cohort && d.PatientId == patientId).FirstOrDefaultAsync(ct);
-        return doc is null ? NotFound() : Ok(doc);
+        var panel = GetPanelGenes();
+        var proj = Builders<GeneExpressionDoc>.Projection
+            .Include(d => d.PatientId)
+            .Include(d => d.CancerCohort)
+            .Include(d => d.Genes);
+        var doc = await _col.Find(d => d.CancerCohort == cohort && d.PatientId == patientId)
+                            .Project<GeneExpressionDoc>(proj)
+                            .FirstOrDefaultAsync(ct);
+        if (doc is null) return NotFound();
+
+        var dict = new Dictionary<string, double>();
+        foreach (var g in panel)
+            if (doc.Genes.TryGetValue(g, out var v)) dict[g] = v;
+
+        return Ok(new
+        {
+            doc.PatientId,
+            doc.CancerCohort,
+            Genes = dict   
+        });
     }
 
-    [HttpPost("by-ids")]
-    public async Task<ActionResult<List<GeneExpressionDoc>>> ByIds([FromQuery] string cohort, [FromBody] List<string> ids, CancellationToken ct)
+    [HttpGet("{cohort}/gene/{gene}/top")]
+    public async Task<ActionResult<List<object>>> TopByGene(
+      string cohort, string gene, [FromQuery] int limit = 20, CancellationToken ct = default)
     {
-        var docs = await _col.Find(d => d.CancerCohort == cohort && ids.Contains(d.PatientId)).ToListAsync(ct);
-        return Ok(docs);
+        if (limit is < 1 or > 200) limit = 20;
+        var key = gene.ToUpperInvariant() == "IL8" ? "CXCL8" : gene.ToUpperInvariant();
+
+        var filter = Builders<GeneExpressionDoc>.Filter.And(
+            Builders<GeneExpressionDoc>.Filter.Eq(d => d.CancerCohort, cohort),
+            Builders<GeneExpressionDoc>.Filter.Exists($"Genes.{key}", true)
+        );
+
+        var proj = Builders<GeneExpressionDoc>.Projection
+            .Include(d => d.PatientId)
+            .Include($"Genes.{key}");
+
+        var docs = await _col.Find(filter)
+            .Sort(Builders<GeneExpressionDoc>.Sort.Descending($"Genes.{key}")) 
+            .Project<BsonDocument>(proj)
+            .Limit(limit)
+            .ToListAsync(ct);
+
+        var result = docs.Select(d => new
+        {
+            PatientId = d["PatientId"].AsString,
+            Value = d["Genes"].AsBsonDocument.GetValue(key, BsonNull.Value).ToDouble()
+        }).ToList();
+
+        return Ok(result);
     }
+
 }
