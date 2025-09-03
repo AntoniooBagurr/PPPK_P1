@@ -1,11 +1,12 @@
--- Tablica: Doctors
+-- Tablica: Doctors(Ovom ddl skriptom je kreiran doktor sa emailom:ante@example.com i passwordom:qwertzuiop)
 CREATE TABLE Doctors (
-    Id UUID PRIMARY KEY,
-    FullName TEXT NOT NULL,
-    LicenseNo TEXT,
-    Email TEXT,
-    Phone TEXT
-);
+Id UUID PRIMARY KEY, 
+FullName text NOT NULL,
+ LicenseNo text,
+ Email character varying NOT NULL DEFAULT ''::text,
+ Phone text,
+ PwdHash character varying NOT NULL DEFAULT ''::text,
+ PwdSalt character varying NOT NULL DEFAULT ''::text);
 
 -- Tablica: Patients
 CREATE TABLE Patients (
@@ -110,3 +111,26 @@ INSERT INTO VisitTypes (Code, Name) VALUES
 ('NEURO', 'Neurološki pregled'),
 ('ULTRA', 'Ultrazvuk'),
 ('X-RAY', 'Rendgensko skeniranje');
+
+-- Ubacivanje početnog doktora
+INSERT INTO Doctors (Id, FullName, LicenseNo, Email, Phone, PwdHash, PwdSalt)
+VALUES (
+    'd3d4dda8-a2ae-4b70-ab47-38e0dda43d88',              
+    'Dr. Ante Antić',           
+    'LIC-12345',                    
+    'ante@example.com',   
+    '+385911234567',                
+    'YkUlqpFO15Dm6ZGFbF1AFcyCbWryn3nj7bQh5aSCGN8=',        
+    'a5qSH9RNGospsZfo1LIPkw=='               
+);
+
+-- Ubacivanje početnih pacijenata
+INSERT INTO Patients (Id, FirstName, LastName, OIB, BirthDate, Sex, PatientNumber) VALUES
+('3af8b947-2503-4ef6-8eca-d15f8e0fd5c4', 'Ivan',   'Babić',     '25595383631', '2001-01-20 00:00:00+00', 'M', P-0003),
+('4613ccf0-2fef-46bb-adb5-614b0ec68089', 'Marko',  'Kovačević', '62867462897', '1995-04-12 00:00:00+00', 'M', P-0001),
+('6ea6a325-f047-4f6e-93eb-89be31e98f4c', 'Petar',  'Perić',     '24332879460', '2003-12-01 00:00:00+00', 'M', P-0002),
+('c3581f5b-5363-4d21-b2b9-e47a336a7358', 'Lucija', 'Novak',     '49109412774', '1999-03-22 00:00:00+00', 'F', P-0004),
+('e18f1a01-a76a-4cb9-a3ba-2f240bd124c7', 'Mateja', 'Jurić',     '95584992710', '1976-06-05 00:00:00+00', 'F', P-0005),
+('f1e9c67e-abeb-4ceb-84ba-1963fde0985d', 'Ana',    'Horvat',    '62498485272', '1988-09-30 00:00:00+00', 'F', P-0006);
+
+
