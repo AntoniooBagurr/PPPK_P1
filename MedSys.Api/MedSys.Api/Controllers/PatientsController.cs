@@ -1,14 +1,16 @@
-﻿using System.Text;
-using MedSys.Api.Data;
+﻿using MedSys.Api.Data;
 using MedSys.Api.Dtos;
 using MedSys.Api.Models;
 using MedSys.Api.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace MedSys.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class PatientsController : ControllerBase
 {

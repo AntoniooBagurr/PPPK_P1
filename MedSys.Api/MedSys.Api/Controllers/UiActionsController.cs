@@ -1,13 +1,15 @@
-﻿using System.Globalization;
-using MedSys.Api.Data;
+﻿using MedSys.Api.Data;
 using MedSys.Api.Models;
 using MedSys.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace MedSys.Api.Controllers;
 
 [ApiExplorerSettings(IgnoreApi = true)]
+[Authorize]
 [Route("ui")]
 public class UiActionsController : Controller
 {

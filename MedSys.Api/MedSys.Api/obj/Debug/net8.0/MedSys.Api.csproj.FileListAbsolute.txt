@@ -130,3 +130,6 @@ C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\obj\Debug\net
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\obj\Debug\net8.0\MedSys.Api.pdb
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\obj\Debug\net8.0\MedSys.Api.genruntimeconfig.cache
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\obj\Debug\net8.0\ref\MedSys.Api.dll
+C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll

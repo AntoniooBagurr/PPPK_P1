@@ -1,12 +1,14 @@
 ﻿using MedSys.Api.Data;
 using MedSys.Api.Dtos;
 using MedSys.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedSys.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/patients/{patientId:guid}/medicalhistory")]
 public class MedicalHistoryController : ControllerBase
 {

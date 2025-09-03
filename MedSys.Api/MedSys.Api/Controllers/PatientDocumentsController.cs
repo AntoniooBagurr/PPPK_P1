@@ -2,12 +2,14 @@
 using MedSys.Api.Dtos;
 using MedSys.Api.Models;
 using MedSys.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedSys.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/patients/{patientId:guid}/documents")]
 [Produces("application/json")]
 public class PatientDocumentsController : ControllerBase

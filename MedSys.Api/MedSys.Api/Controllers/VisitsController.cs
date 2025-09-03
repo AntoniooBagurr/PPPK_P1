@@ -1,11 +1,13 @@
 ﻿using MedSys.Api.Data;
 using MedSys.Api.Dtos;
 using MedSys.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MedSys.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class VisitsController : ControllerBase
 {

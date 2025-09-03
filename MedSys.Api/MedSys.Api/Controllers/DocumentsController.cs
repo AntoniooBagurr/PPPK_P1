@@ -2,6 +2,7 @@
 using MedSys.Api.Dtos;
 using MedSys.Api.Models;
 using MedSys.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MedSys.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/visits/{visitId:guid}/[controller]")]
 [Produces("application/json")]
 public class DocumentsController : ControllerBase

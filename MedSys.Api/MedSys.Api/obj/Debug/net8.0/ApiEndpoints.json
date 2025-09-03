@@ -1,5 +1,37 @@
 [
   {
+    "ContainingType": "MedSys.Api.Controllers.AuthController",
+    "Method": "Login",
+    "RelativePath": "api/auth/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "MedSys.Api.Controllers.AuthController\u002BDoctorLoginDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MedSys.Api.Controllers.AuthController",
+    "Method": "SetPassword",
+    "RelativePath": "api/auth/set-password",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "MedSys.Api.Controllers.AuthController\u002BSetPasswordDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "MedSys.Api.Controllers.DoctorsController",
     "Method": "Search",
     "RelativePath": "api/Doctors",
