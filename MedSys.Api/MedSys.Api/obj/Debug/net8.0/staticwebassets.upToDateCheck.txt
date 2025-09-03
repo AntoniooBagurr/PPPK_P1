@@ -3,5 +3,5 @@ wwwroot\index.html
 wwwroot\js\api.js
 wwwroot\js\patient.js
 wwwroot\login.html
-wwwroot\visit-new.html
 wwwroot\patient.html
+wwwroot\visit-new.html
