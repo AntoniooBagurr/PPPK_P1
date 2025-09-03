@@ -46,7 +46,7 @@ public class PrescriptionsController : ControllerBase
                 {
                     med = new Medication { Name = name };
                     _db.Medications.Add(med);
-                    await _db.SaveChangesAsync(); // da dobijemo Id
+                    await _db.SaveChangesAsync();
                 }
             }
             else return BadRequest("Nedostaje lijek (MedicationId ili MedicationName).");

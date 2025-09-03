@@ -37,9 +37,7 @@ public class PatientsController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(lastName))
         {
-            // PostgreSQL (ILIKE):
             q = q.Where(p => EF.Functions.ILike(p.LastName, lastName + "%"));
-            // Ako nisi na PostgreSQL-u, zamijeni s:
             // q = q.Where(p => p.LastName.ToLower().StartsWith(lastName.ToLower()));
         }
 
@@ -157,7 +155,7 @@ public class PatientsController : ControllerBase
         return NoContent();
     }
 
-    // GET /api/patients/export.csv  (izvoz LISTE – prati iste filtere kao tražilica)
+    // GET /api/patients/export.csv 
     [HttpGet("export.csv")]
     public async Task<IActionResult> ExportListCsv([FromQuery] string? lastName, [FromQuery] string? oib)
     {
@@ -185,7 +183,7 @@ public class PatientsController : ControllerBase
         return File(bytes, "text/csv; charset=utf-8", "patients.csv");
     }
 
-    // GET /api/patients/{id}/export.csv  (izvoz JEDNOG pacijenta)
+    // GET /api/patients/{id}/export.csv 
     [HttpGet("{id:guid}/export.csv")]
     public async Task<IActionResult> ExportPatientCsv(Guid id)
     {
@@ -224,7 +222,7 @@ public class PatientsController : ControllerBase
         }
         sb.AppendLine();
 
-        // 4) Dokumenti pacijenta (ako postoji takva tablica/veza)
+        // 4) Dokumenti pacijenta 
         var patientDocs = await _db.Documents
             .Where(d => d.PatientId == id)
             .OrderByDescending(d => d.UploadedAt)

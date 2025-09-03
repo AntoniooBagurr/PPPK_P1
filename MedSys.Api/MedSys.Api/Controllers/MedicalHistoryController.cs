@@ -13,7 +13,6 @@ public class MedicalHistoryController : ControllerBase
     private readonly AppDb _db;
     public MedicalHistoryController(AppDb db) => _db = db;
 
-    // helper: Unspecified -> UTC date (bez vremena)
     private static DateTime AsUtcDate(DateTime d)
         => DateTime.SpecifyKind(d.Date, DateTimeKind.Utc);
 

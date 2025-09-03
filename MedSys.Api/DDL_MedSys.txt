@@ -1,0 +1,112 @@
+-- Tablica: Doctors
+CREATE TABLE Doctors (
+    Id UUID PRIMARY KEY,
+    FullName TEXT NOT NULL,
+    LicenseNo TEXT,
+    Email TEXT,
+    Phone TEXT
+);
+
+-- Tablica: Patients
+CREATE TABLE Patients (
+    Id UUID PRIMARY KEY,
+    FirstName TEXT NOT NULL,
+    LastName TEXT NOT NULL,
+    OIB VARCHAR NOT NULL UNIQUE,
+    BirthDate TIMESTAMPTZ NOT NULL,
+    Sex TEXT NOT NULL CHECK (Sex IN ('M', 'F')),
+    PatientNumber TEXT
+);
+
+-- Tablica: VisitTypes
+CREATE TABLE VisitTypes (
+    Code TEXT PRIMARY KEY,
+    Name TEXT NOT NULL
+);
+
+-- Tablica: Visits
+CREATE TABLE Visits (
+    Id UUID PRIMARY KEY,
+    PatientId UUID NOT NULL REFERENCES Patients(Id) ON DELETE CASCADE,
+    VisitDateTime TIMESTAMPTZ NOT NULL,
+    VisitType TEXT NOT NULL REFERENCES VisitTypes(Code),
+    Notes TEXT,
+    DoctorId UUID REFERENCES Doctors(Id) ON DELETE SET NULL
+);
+
+-- Tablica: MedicalHistory
+CREATE TABLE MedicalHistory (
+    Id UUID PRIMARY KEY,
+    PatientId UUID NOT NULL REFERENCES Patients(Id) ON DELETE CASCADE,
+    DiseaseName TEXT NOT NULL,
+    StartDate TIMESTAMPTZ NOT NULL,
+    EndDate TIMESTAMPTZ
+);
+
+-- Tablica: Medications
+CREATE TABLE Medications (
+    Id UUID PRIMARY KEY,
+    Name TEXT NOT NULL,
+    AtcCode TEXT
+);
+
+-- Tablica: Prescriptions
+CREATE TABLE Prescriptions (
+    Id UUID PRIMARY KEY,
+    VisitId UUID NOT NULL REFERENCES Visits(Id) ON DELETE CASCADE,
+    IssuedAt TIMESTAMPTZ DEFAULT NOW(),
+    Notes TEXT
+);
+
+-- Tablica: PrescriptionItems
+CREATE TABLE PrescriptionItems (
+    Id UUID PRIMARY KEY,
+    PrescriptionId UUID NOT NULL REFERENCES Prescriptions(Id) ON DELETE CASCADE,
+    MedicationId UUID NOT NULL REFERENCES Medications(Id) ON DELETE CASCADE,
+    Dosage TEXT NOT NULL,
+    Frequency TEXT NOT NULL,
+    DurationDays INTEGER NOT NULL
+);
+
+-- Tablica: Documents
+CREATE TABLE Documents (
+    Id UUID PRIMARY KEY,
+    VisitId UUID REFERENCES Visits(Id) ON DELETE SET NULL,
+    PatientId UUID REFERENCES Patients(Id) ON DELETE CASCADE,
+    FileName TEXT NOT NULL,
+    ContentType TEXT DEFAULT 'application/octet-stream',
+    SizeBytes BIGINT NOT NULL,
+    StorageUrl TEXT NOT NULL,
+    UploadedAt TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tablica za Entity Framework migracije
+CREATE TABLE __EFMigrationsHistory (
+    MigrationId VARCHAR PRIMARY KEY,
+    ProductVersion VARCHAR NOT NULL
+);
+
+-- Ubacivanje početnih podataka u tabelu Medications
+INSERT INTO Medications (Id, Name, AtcCode) VALUES
+('24afeb9f-3444-4a9e-850f-0359746bc88c', 'Diklofenak', 'M01AB05'),
+('5fc4e486-e8ae-48bc-a696-91b34512aa62', 'Amokliscin', NULL),
+('60d846e5-08fa-4be6-9cbb-97ad38c91bb0', 'Ibuprofen', 'M01AE01'),
+('76486e4a-2d4d-4aad-87a8-ab06daa4bd23', 'Paracetamol', 'N02BE01'),
+('9159db1e-a44d-4426-b70d-9e68dfedd3ad', 'Doksiciklin', 'J01AA02'),
+('d84bd627-2c7b-4063-960e-6e6f12fb4da2', 'Kapi za oči', NULL);
+
+-- Ubacivanje početnih podataka u tabelu VisitTypes
+INSERT INTO VisitTypes (Code, Name) VALUES
+('CT', 'CT sken'),
+('DENTA', 'Pregled zuba'),
+('DERM', 'Dermatološki pregled'),
+('ECHO', 'Ehokardiogram'),
+('EKG', 'Elektrokardiogram'),
+('EYE', 'Pregled očiju'),
+('GP', 'Opći tjelesni pregled'),
+('KRV', 'Test krvi'),
+('MAMMO', 'Mamografija'),
+('MR', 'MRI sken'),
+('NEURO', 'Neurološki pregled'),
+('ULTRA', 'Ultrazvuk'),
+('X-RAY', 'Rendgensko skeniranje');

@@ -1,5 +1,4 @@
-﻿// wwwroot/js/api.js
-const apiBase = ""; // isti origin (https://localhost:7290)
+﻿const apiBase = ""; 
 
 // --- HTTP helpers ---
 async function apiGet(path) {

@@ -11,13 +11,10 @@
             const id = new URLSearchParams(location.search).get('id');
             if (!id) { alert('Nedostaje ?id=...'); return; }
 
-            // back link
             document.querySelector('#back').href = '/index.html';
 
-            // CSV link za jednog pacijenta
             document.querySelector('#btnCsv').href = `/api/patients/${id}/export.csv`;
 
-            // … ostatak logike trenutno u patient.js (ako želiš zadržati) …
         });
     </script>
     <script src="/js/patient.js?v=10" defer></script>

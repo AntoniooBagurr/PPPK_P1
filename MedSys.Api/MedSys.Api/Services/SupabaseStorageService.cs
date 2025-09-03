@@ -1,4 +1,4 @@
-﻿using Supabase;          // samo ovaj using (bez Supabase.Storage)
+﻿using Supabase;          
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +7,7 @@ namespace MedSys.Api.Services
 {
     public class SupabaseStorageService : IStorageService
     {
-        private readonly Supabase.Client _client;   // eksplicitno kvalificiran tip
+        private readonly Supabase.Client _client;   
         private readonly string _bucket;
 
         public SupabaseStorageService(IConfiguration cfg)
@@ -27,11 +27,11 @@ namespace MedSys.Api.Services
         {
             await _client.InitializeAsync();
 
-            // stream -> byte[]
+          
             byte[] bytes;
             using (var ms = new MemoryStream())
             {
-                await stream.CopyToAsync(ms, ct);  // ovdje i dalje koristiš ct
+                await stream.CopyToAsync(ms, ct);  
                 bytes = ms.ToArray();
             }
 
@@ -43,14 +43,13 @@ namespace MedSys.Api.Services
                 Upsert = true
             };
 
-            // ✅ 5. argument je bool (upsert)
+          
             await bucket.Upload(bytes, pathInBucket, opts, null, true);
 
-            // ako je bucket private → potpisani URL (7 dana)
+          
             var signed = await bucket.CreateSignedUrl(pathInBucket, 60 * 60 * 24 * 7);
             return signed;
 
-            // ako je PUBLIC bucket: return bucket.GetPublicUrl(pathInBucket);
 
         }
     }

@@ -30,7 +30,7 @@ public class MedicationsController : ControllerBase
         return Ok(list);
     }
 
-    // (opcionalno) POST /api/medications  – ručno dodavanje jednog lijeka
+    // (opcionalno) POST /api/medications 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] MedicationCreateDto dto)
     {
@@ -47,7 +47,6 @@ public class MedicationsController : ControllerBase
         return CreatedAtAction(nameof(Search), new { q = med.Name }, new MedicationReadDto(med.Id, med.Name, med.AtcCode));
     }
 
-    // (opcionalno) brzi seed ako baza nema lijekove
     [HttpPost("seed")]
     public async Task<IActionResult> Seed()
     {
