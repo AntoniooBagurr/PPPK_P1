@@ -1,0 +1,98 @@
+﻿<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8" />
+    <title>MedSys – Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body {
+            font-family: system-ui,Segoe UI,Arial;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            height: 100dvh;
+            background: #f7f7f8
+        }
+
+        form {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.08);
+            min-width: 300px
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        .err {
+            color: #b91c1c;
+            margin-top: 8px;
+            min-height: 1.2em
+        }
+    </style>
+</head>
+<body>
+    <form id="f">
+        <h3>Prijava</h3>
+        <input id="u" placeholder="Email ili licenca" autocomplete="username" />
+        <input id="p" placeholder="Lozinka" type="password" autocomplete="current-password" />
+        <button>Prijavi se</button>
+        <div class="err" id="e"></div>
+    </form>
+
+    <script>
+        (async function () {
+            const TOKEN_KEY = 'medsys.jwt';
+            const next = new URLSearchParams(location.search).get('next') || '/index.html';
+
+            if (localStorage.getItem(TOKEN_KEY)) {
+                location.href = next;
+                return;
+            }
+
+            const f = document.getElementById('f');
+            const u = document.getElementById('u');
+            const p = document.getElementById('p');
+            const e = document.getElementById('e');
+
+            f.addEventListener('submit', async (ev) => {
+                ev.preventDefault();
+                e.textContent = '';
+
+                try {
+                    const res = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify({ username: u.value.trim(), password: p.value })
+                    });
+                    if (!res.ok) throw new Error(await res.text());
+                    const data = await res.json();
+
+                    localStorage.setItem(TOKEN_KEY, data.token);
+                    localStorage.setItem('doctor', JSON.stringify(data.doctor || {}));
+                    location.href = next;
+                } catch (err) {
+                    e.textContent = (err && err.message) ? err.message : 'Neispravno korisničko ime ili lozinka.';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

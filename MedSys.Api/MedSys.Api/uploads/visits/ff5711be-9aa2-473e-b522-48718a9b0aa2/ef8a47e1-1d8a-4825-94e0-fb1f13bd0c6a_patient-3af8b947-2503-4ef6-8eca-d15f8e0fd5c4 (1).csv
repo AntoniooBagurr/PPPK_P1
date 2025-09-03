@@ -1,0 +1,19 @@
+﻿Pacijent,OIB,Datum rođenja,Spol,Broj pacijenta
+"Ivan Babić","25595383631",2001-01-20,"M","P-0003"
+
+Povijest bolesti
+Naziv,Početak,Kraj
+"Dermatitis",2025-09-01,2025-09-03
+"Prehlada",2025-08-27,2025-08-28
+"Upala pluća",2025-08-05,2025-08-19
+
+Pregledi
+Datum/vrijeme,Tip,Liječnik,Bilješka,Dokumenti
+2025-09-06 15:09,"KRV","","","PodručjeIstraživanja.png"
+2025-08-29 19:00,"EYE","","",""
+2025-08-29 11:08,"EKG","","Hitan pregled","patient_Babić_Ivan.csv"
+2025-08-28 12:52,"X-RAY","","Hitan pregled",""
+
+Dokumenti pacijenta
+Naziv,Veličina (B),Uploadano
+"PodručjeIstraživanja.png",2736061,2025-09-03 15:09

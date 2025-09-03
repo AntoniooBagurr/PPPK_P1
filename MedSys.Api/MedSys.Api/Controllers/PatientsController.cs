@@ -5,7 +5,10 @@ using MedSys.Api.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
+using Microsoft.Net.Http.Headers;
 
 namespace MedSys.Api.Controllers;
 
@@ -185,7 +188,6 @@ public class PatientsController : ControllerBase
         return File(bytes, "text/csv; charset=utf-8", "patients.csv");
     }
 
-    // GET /api/patients/{id}/export.csv 
     [HttpGet("{id:guid}/export.csv")]
     public async Task<IActionResult> ExportPatientCsv(Guid id)
     {
@@ -201,19 +203,16 @@ public class PatientsController : ControllerBase
 
         var sb = new StringBuilder();
 
-        // 1) Osobni podaci
         sb.AppendLine("Pacijent,OIB,Datum rođenja,Spol,Broj pacijenta");
         sb.AppendLine($"{Q($"{p.FirstName} {p.LastName}")},{Q(p.OIB)},{p.BirthDate:yyyy-MM-dd},{Q(p.Sex)},{Q(p.PatientNumber)}");
         sb.AppendLine();
 
-        // 2) Povijest bolesti
         sb.AppendLine("Povijest bolesti");
         sb.AppendLine("Naziv,Početak,Kraj");
         foreach (var h in p.MedicalHistory.OrderByDescending(h => h.StartDate))
             sb.AppendLine($"{Q(h.DiseaseName)},{h.StartDate:yyyy-MM-dd},{(h.EndDate.HasValue ? h.EndDate.Value.ToString("yyyy-MM-dd") : "")}");
         sb.AppendLine();
 
-        // 3) Pregledi
         sb.AppendLine("Pregledi");
         sb.AppendLine("Datum/vrijeme,Tip,Liječnik,Bilješka,Dokumenti");
         foreach (var v in p.Visits.OrderByDescending(v => v.VisitDateTime))
@@ -224,7 +223,6 @@ public class PatientsController : ControllerBase
         }
         sb.AppendLine();
 
-        // 4) Dokumenti pacijenta 
         var patientDocs = await _db.Documents
             .Where(d => d.PatientId == id)
             .OrderByDescending(d => d.UploadedAt)
@@ -239,11 +237,37 @@ public class PatientsController : ControllerBase
         }
 
         var bytes = Utf8Bom(sb.ToString());
-        var fileName = $"pacijent_{p.LastName}_{p.FirstName}.csv";
-        return File(bytes, "text/csv; charset=utf-8", fileName);
+
+        var pretty = $"pacijent_{p.FirstName}_{p.LastName}.csv";
+        var ascii = MakeCsvName(pretty); 
+
+        Response.Headers.Remove(HeaderNames.ContentDisposition);
+        Response.Headers[HeaderNames.ContentDisposition] =
+            $"attachment; filename=\"{ascii}\"; filename*=UTF-8''{Uri.EscapeDataString(pretty)}";
+
+        return File(bytes, "text/csv; charset=utf-8");
     }
 
+
     // ===== helpers =====
+
+    private static string MakeCsvName(string name)
+    {
+        if (!name.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+            name += ".csv";
+
+        var norm = name.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder(norm.Length);
+        foreach (var ch in norm)
+        {
+            var cat = CharUnicodeInfo.GetUnicodeCategory(ch);
+            if (cat != UnicodeCategory.NonSpacingMark) sb.Append(ch);
+        }
+        var cleaned = Regex.Replace(sb.ToString(), @"[^A-Za-z0-9\.\-_]+", "_");
+        cleaned = Regex.Replace(cleaned, "_{2,}", "_").Trim('_');
+        return cleaned.ToLowerInvariant();
+    }
+
     private static string Csv(string? s) =>
         s is null ? "" : $"\"{s.Replace("\"", "\"\"")}\"";
 

@@ -1,27 +1,81 @@
-﻿const apiBase = ""; 
+﻿const apiBase = "";  
 
-// --- HTTP helpers ---
-async function apiGet(path) {
-    const r = await fetch(apiBase + path);
-    if (!r.ok) throw new Error(await r.text());
-    return r.json();
+// ====== AUTH (JWT) ======
+const TOKEN_KEY = "medsys.jwt";
+
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
+function clearToken() { localStorage.removeItem(TOKEN_KEY); }
+
+function redirectToLogin() {
+    const next = encodeURIComponent(location.pathname + location.search);
+    location.href = `/login.html?next=${next}`;
 }
+
+async function apiFetch(path, opts = {}) {
+    const token = getToken();
+    if (!token) return redirectToLogin();
+
+    const headers = new Headers(opts.headers || {});
+    headers.set("Authorization", "Bearer " + token);
+    if (!headers.has("Accept")) headers.set("Accept", "application/json");
+
+    const res = await fetch(apiBase + path, { ...opts, headers });
+
+    if (res.status === 401 || res.status === 403) {
+        clearToken();
+        return redirectToLogin();
+    }
+
+    if (!res.ok) {
+        let msg = "";
+        try { msg = await res.text(); } catch { }
+        throw new Error(msg || res.statusText || "Greška pri pozivu API-ja.");
+    }
+
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("application/json")) return res.json();
+    return res;
+}
+
+async function apiGet(path) {
+    return apiFetch(path);
+}
+
 async function apiPostJson(path, body) {
-    const r = await fetch(apiBase + path, {
+    return apiFetch(path, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
     });
-    if (!r.ok) throw new Error(await r.text());
-    try { return await r.json(); } catch { return {}; }
-}
-async function apiPostForm(path, formData) {
-    const r = await fetch(apiBase + path, { method: "POST", body: formData });
-    if (!r.ok) throw new Error(await r.text());
-    try { return await r.json(); } catch { return {}; }
 }
 
-// --- DOM & UI helpers ---
+async function apiPostForm(path, formData) {
+    return apiFetch(path, { method: "POST", body: formData });
+}
+
+async function downloadFile(path, filename = "download") {
+    const res = await apiFetch(path);
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
+}
+
+
+async function authBadge() {
+    try {
+        const me = await apiGet("/api/auth/me");
+        const el = document.getElementById("whoami");
+        if (el) el.textContent = me?.name || me?.email || "Prijavljen";
+    } catch {  }
+}
+
+// ====== DOM & UI helpers ======
 function qsel(sel) { return document.querySelector(sel); }
 function qparam(name) { return new URL(location.href).searchParams.get(name); }
 function esc(v) {

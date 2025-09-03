@@ -7,6 +7,15 @@
     <script defer src="/js/api.js"></script>
     <script defer>
         document.addEventListener('DOMContentLoaded', () => {
+
+            if (!localStorage.getItem('medsys.jwt')) {
+                const next = encodeURIComponent(location.pathname + location.search);
+                location.href = `/login.html?next=${next}`;
+                return;
+            }
+
+            authBadge();
+
             const rows = qsel('#rows'), msg = qsel('#msg');
 
             async function search() {
@@ -29,7 +38,19 @@
             }
 
             qsel('#btnSearch').addEventListener('click', search);
-            // automatski prvi load
+
+            qsel('#btnCsv').addEventListener('click', async (e) => {
+                e.preventDefault();
+                try { await downloadFile('/api/patients/export.csv', 'patients.csv'); }
+                catch (err) { toast(err.message); }
+            });
+
+            qsel('#logout')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('medsys.jwt');
+                location.href = '/login.html';
+            });
+
             search();
         });
     </script>
@@ -39,9 +60,12 @@
         <h1>MedSys</h1>
         <nav>
             <a class="btn" href="/index.html">Pacijenti</a>
-            <a class="btn" href="/api/patients/export.csv" target="_blank" rel="noopener">Izvoz CSV</a>
+            <a id="btnCsv" class="btn" href="#">Izvoz CSV</a>
+            <span id="whoami" class="nav-user"></span>
             <a class="btn ghost" href="/swagger" target="_blank" rel="noopener">Swagger</a>
+            <a id="logout" class="btn ghost" href="#">Odjava</a>
         </nav>
+
     </header>
 
     <main class="card">

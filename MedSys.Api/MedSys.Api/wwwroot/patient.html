@@ -8,13 +8,44 @@
     <script src="/js/api.js?v=10" defer></script>
     <script defer>
         document.addEventListener('DOMContentLoaded', async () => {
+            if (!localStorage.getItem('medsys.jwt')) {
+                const next = encodeURIComponent(location.pathname + location.search);
+                location.href = `/login.html?next=${next}`;
+                return;
+            }
+
+            authBadge();
+
             const id = new URLSearchParams(location.search).get('id');
             if (!id) { alert('Nedostaje ?id=...'); return; }
 
             document.querySelector('#back').href = '/index.html';
 
-            document.querySelector('#btnCsv').href = `/api/patients/${id}/export.csv`;
+            const btnCsv = document.querySelector('#btnCsv');
+            btnCsv.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try { await downloadFile(`/api/patients/${id}/export.csv`, `patient-${id}.csv`); }
+                catch (err) { toast(err.message); }
+            });
+        });
+    </script>
+    <script defer>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const id = new URLSearchParams(location.search).get('id');
+            if (!id) { alert('Nedostaje ?id=...'); return; }
 
+            const data = await apiGet(`/api/patients/${id}`);
+            const first = (data.patient.firstName || '').toString();
+            const last = (data.patient.lastName || '').toString();
+
+            const nice = `pacijent_${first}_${last}`
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')   
+                .replace(/[^A-Za-z0-9._-]+/g, '_')                 
+                .toLowerCase();
+
+            const a = document.querySelector('#btnCsv');
+            a.href = `/api/patients/${id}/export.csv`;
+            a.setAttribute('download', `${nice}.csv`);          
         });
     </script>
     <script src="/js/patient.js?v=10" defer></script>
@@ -25,6 +56,7 @@
         <nav>
             <a class="btn" href="/index.html">Pacijenti</a>
             <a id="btnCsv" class="btn" href="#" target="_blank" rel="noopener">Izvoz CSV</a>
+            <span id="whoami" class="muted" style="margin-left:8px"></span>
             <a class="btn ghost" href="/swagger" target="_blank" rel="noopener">Swagger</a>
         </nav>
     </header>

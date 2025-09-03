@@ -1,15 +1,15 @@
 [
   {
     "ContainingType": "MedSys.Api.Controllers.AuthController",
-    "Method": "Login",
-    "RelativePath": "api/auth/login",
+    "Method": "ChangePassword",
+    "RelativePath": "api/auth/change-password",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "dto",
-        "Type": "MedSys.Api.Controllers.AuthController\u002BDoctorLoginDto",
+        "Type": "MedSys.Api.Controllers.AuthController\u002BChangePasswordRequest",
         "IsRequired": true
       }
     ],
@@ -17,7 +17,43 @@
   },
   {
     "ContainingType": "MedSys.Api.Controllers.AuthController",
-    "Method": "SetPassword",
+    "Method": "Login",
+    "RelativePath": "api/auth/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "req",
+        "Type": "MedSys.Api.Controllers.AuthController\u002BLoginRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "MedSys.Api.Controllers.AuthController\u002BLoginResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "MedSys.Api.Controllers.AuthController",
+    "Method": "Me",
+    "RelativePath": "api/auth/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MedSys.Api.Controllers.AuthController",
+    "Method": "SetPasswordFirst",
     "RelativePath": "api/auth/set-password",
     "HttpMethod": "POST",
     "IsController": true,
@@ -25,7 +61,7 @@
     "Parameters": [
       {
         "Name": "dto",
-        "Type": "MedSys.Api.Controllers.AuthController\u002BSetPasswordDto",
+        "Type": "MedSys.Api.Controllers.AuthController\u002BSetPasswordFirstRequest",
         "IsRequired": true
       }
     ],

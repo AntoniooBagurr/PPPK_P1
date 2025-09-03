@@ -14,21 +14,50 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_DoctorLoginDto"
+                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_LoginRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_DoctorLoginDto"
+                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_LoginRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_DoctorLoginDto"
+                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_LoginRequest"
               }
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_LoginResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_LoginResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -45,17 +74,48 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_SetPasswordDto"
+                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_SetPasswordFirstRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_SetPasswordDto"
+                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_SetPasswordFirstRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_SetPasswordDto"
+                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_SetPasswordFirstRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/auth/change-password": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_ChangePasswordRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_ChangePasswordRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MedSys.Api.Controllers.AuthController_ChangePasswordRequest"
               }
             }
           }
@@ -1046,29 +1106,41 @@
   },
   "components": {
     "schemas": {
-      "MedSys.Api.Controllers.AuthController_DoctorLoginDto": {
-        "required": [
-          "email",
-          "password"
-        ],
+      "MedSys.Api.Controllers.AuthController_ChangePasswordRequest": {
         "type": "object",
         "properties": {
-          "email": {
-            "minLength": 1,
+          "currentPassword": {
             "type": "string"
           },
-          "password": {
-            "minLength": 1,
+          "newPassword": {
             "type": "string"
           }
         },
         "additionalProperties": false
       },
-      "MedSys.Api.Controllers.AuthController_SetPasswordDto": {
-        "required": [
-          "doctorId",
-          "newPassword"
-        ],
+      "MedSys.Api.Controllers.AuthController_LoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MedSys.Api.Controllers.AuthController_LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "doctor": { }
+        },
+        "additionalProperties": false
+      },
+      "MedSys.Api.Controllers.AuthController_SetPasswordFirstRequest": {
         "type": "object",
         "properties": {
           "doctorId": {
@@ -1076,7 +1148,6 @@
             "format": "uuid"
           },
           "newPassword": {
-            "minLength": 8,
             "type": "string"
           }
         },

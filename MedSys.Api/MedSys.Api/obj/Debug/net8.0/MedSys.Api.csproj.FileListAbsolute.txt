@@ -13,6 +13,7 @@ C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\FluentValidation.AspNetCore.dll
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Humanizer.dll
+C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.CodeAnalysis.CSharp.dll
@@ -27,6 +28,8 @@ C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IO.RecyclableMemoryStream.dll
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.OpenApi.dll
@@ -130,6 +133,3 @@ C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\obj\Debug\net
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\obj\Debug\net8.0\MedSys.Api.pdb
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\obj\Debug\net8.0\MedSys.Api.genruntimeconfig.cache
 C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\obj\Debug\net8.0\ref\MedSys.Api.dll
-C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
-C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
-C:\Users\Antonio\Desktop\ProjectTask\PPPK_P1\MedSys.Api\MedSys.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
