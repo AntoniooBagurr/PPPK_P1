@@ -1,6 +1,5 @@
 ﻿using MedSys.Api.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace MedSys.Api.Data;
 
@@ -20,16 +19,16 @@ public class AppDb : DbContext
 
     protected override void OnModelCreating(ModelBuilder b)
     {
-        // Patient
+        base.OnModelCreating(b);
+
+        // ===================== Patient =====================
         b.Entity<Patient>(e =>
         {
             e.Property(x => x.OIB).IsRequired().HasMaxLength(11);
             e.HasIndex(x => x.LastName);
         });
 
-        base.OnModelCreating(b);
-        // visit types
-
+        // ===================== VisitType =====================
         b.Entity<VisitType>(e =>
         {
             e.HasKey(vt => vt.Code);
@@ -37,25 +36,33 @@ public class AppDb : DbContext
         });
 
         b.Entity<Visit>()
-         .HasOne<VisitType>()
-         .WithMany()
-         .HasForeignKey(v => v.VisitType)
-         .HasPrincipalKey(vt => vt.Code);
+            .HasOne<VisitType>()
+            .WithMany()
+            .HasForeignKey(v => v.VisitType)
+            .HasPrincipalKey(vt => vt.Code);
 
-        // Doctor
+        // ===================== Doctor (AUTH) =====================
         b.Entity<Doctor>(e =>
         {
             e.Property(d => d.FullName).IsRequired().HasMaxLength(150);
+
             e.HasIndex(d => d.LicenseNo).IsUnique().HasFilter("\"LicenseNo\" IS NOT NULL");
+
+            e.Property(d => d.Email).HasMaxLength(256);
+            e.HasIndex(d => d.Email).IsUnique().HasFilter("\"Email\" IS NOT NULL");
+
+            e.Property(d => d.PwdHash).HasMaxLength(256).IsRequired();
+            e.Property(d => d.PwdSalt).HasMaxLength(256).IsRequired();
         });
 
-        // Visit → Doctor (FK)
+        // Visit → Doctor 
         b.Entity<Visit>()
             .HasOne(v => v.Doctor)
             .WithMany(d => d.Visits)
             .HasForeignKey(v => v.DoctorId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // ===================== Document =====================
         b.Entity<Document>(e =>
         {
             e.HasKey(d => d.Id);
@@ -75,8 +82,5 @@ public class AppDb : DbContext
 
             e.Property(d => d.UploadedAt).HasDefaultValueSql("now()");
         });
-
-
-
     }
 }
