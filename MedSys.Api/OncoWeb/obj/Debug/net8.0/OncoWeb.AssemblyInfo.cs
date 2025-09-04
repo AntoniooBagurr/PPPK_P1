@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OncoWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5163ec2a499ca0610323badf08105f5b0c7eb54e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a53f2c5dc19f0dfaa4e1c50da034a7c9fc6ae232")]
 [assembly: System.Reflection.AssemblyProductAttribute("OncoWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OncoWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -112,7 +112,7 @@ using (var scope = app.Services.CreateScope())
 
 app.UseDefaultFiles(new DefaultFilesOptions
 {
-    DefaultFileNames = new List<string> { "index.html" }
+    DefaultFileNames = new List<string> { "login.html" }
 });
 
 if (app.Environment.IsDevelopment())
